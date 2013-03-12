@@ -1,8 +1,10 @@
 require 'optparse'
 
 class EventMachine::MQTTS::Gateway
-  attr_accessor :address
-  attr_accessor :port
+  attr_accessor :mqtts_address
+  attr_accessor :mqtts_port
+  attr_accessor :broker_address
+  attr_accessor :broker_port
   attr_accessor :logger
 
   def initialize(args=[])
@@ -28,11 +30,11 @@ class EventMachine::MQTTS::Gateway
       end
 
       opts.on("-a", "--address [HOST]", "bind to HOST address (default: #{address})") do |address|
-        self.address = address
+        self.mqtts_address = address
       end
 
       opts.on("-p", "--port [PORT]", "port number to run on (default: #{port})") do |port|
-        self.port = port
+        self.mqtts_port = port
       end
 
       opts.on_tail("-h", "--help", "show this message") do
@@ -55,8 +57,13 @@ class EventMachine::MQTTS::Gateway
       Signal.trap("INT")  { EventMachine.stop }
       Signal.trap("TERM") { EventMachine.stop }
 
-      logger.info("Starting MQTT-S gateway on UDP #{address}:#{port}")
-      EventMachine.start_server(address, port, EventMachine::MQTTS::ServerConnection, logger)
+      logger.info("Starting MQTT-S gateway on UDP #{mqtts_address}:#{mqtts_port}")
+      EventMachine.open_datagram_socket(
+        mqtts_address,
+        mqtts_port,
+        EventMachine::MQTTS::ServerConnection,
+        logger
+      )
     end
   end
 

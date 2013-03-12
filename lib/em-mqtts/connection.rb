@@ -20,7 +20,7 @@ class EventMachine::MQTTS::Connection < EventMachine::Connection
   end
 
   def receive_data(data)
-    @packet = EventMachine::MQTTS::Packet.parse(@data)
+    @packet = EventMachine::MQTTS::Packet.parse(data)
     @last_received = Time.now
     process_packet(@packet)
   end
