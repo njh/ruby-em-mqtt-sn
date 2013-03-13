@@ -113,26 +113,21 @@ module EventMachine::MQTTS
 
       # Get serialisation of packet's body
       def encode_body
-        body = ''
         if @client_id.nil? or @client_id.length < 1 or @client_id.length > 23
           raise "Invalid client identifier when serialising packet"
         end
 
-        body += [encode_flags, 0x01, keep_alive].pack('CCn')
-        body += client_id
-        return body
+        [encode_flags, 0x01, keep_alive, client_id].pack('CCna*')
       end
 
       def parse_body(buffer)
-        flags,protocol_id,duration,client_id = buffer.unpack('CCna*')
+        flags, protocol_id, self.keep_alive, self.client_id = buffer.unpack('CCna*')
 
         if protocol_id != 0x01
           raise ProtocolException.new("Unsupported protocol ID number: #{protocol_id}")
         end
 
         parse_flags(flags)
-        self.keep_alive = duration
-        self.client_id = client_id
       end
     end
 
