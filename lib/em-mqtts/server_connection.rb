@@ -1,7 +1,6 @@
 
-class EventMachine::MQTTS::ServerConnection < EventMachine::MQTTS::Connection
+class EventMachine::MQTTS::ServerConnection < EventMachine::Connection
 
-  attr_reader :timer
   attr_reader :logger
 
   def initialize(logger)

@@ -15,8 +15,7 @@ module EventMachine::MQTTS
   class ProtocolException < MQTT::Exception
   end
 
-  autoload :ClientConnection, 'em-mqtts/client_connection'
-  autoload :Connection,       'em-mqtts/connection'
+  autoload :ClientState,      'em-mqtts/client_state'
   autoload :Gateway,          'em-mqtts/gateway'
   autoload :Packet,           'em-mqtts/packet'
   autoload :ServerConnection, 'em-mqtts/server_connection'
