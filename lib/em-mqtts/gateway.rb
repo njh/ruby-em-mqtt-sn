@@ -29,11 +29,11 @@ class EventMachine::MQTTS::Gateway
         self.logger.level = Logger::DEBUG
       end
 
-      opts.on("-a", "--address [HOST]", "bind to HOST address (default: #{address})") do |address|
+      opts.on("-a", "--address [HOST]", "bind to HOST address (default: #{mqtts_address})") do |address|
         self.mqtts_address = address
       end
 
-      opts.on("-p", "--port [PORT]", "port number to run on (default: #{port})") do |port|
+      opts.on("-p", "--port [PORT]", "port number to run on (default: #{mqtts_port})") do |port|
         self.mqtts_port = port
       end
 
