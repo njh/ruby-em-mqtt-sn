@@ -127,4 +127,103 @@ describe EventMachine::MQTTS::Packet::Connect do
     end
   end
 
+describe EventMachine::MQTTS::Packet::Connack do
+  describe "when serialising a packet" do
+    it "should output the correct bytes for a sucessful connection acknowledgement packet" do
+      packet = EventMachine::MQTTS::Packet::Connack.new( :return_code => 0x00 )
+      packet.to_s.should == "\x03\x05\x00"
+    end
+  end
+
+  describe "when parsing a successful Connection Accepted packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x00" )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+    end
+
+    it "should set the return code of the packet correctly" do
+      @packet.return_code.should == 0x00
+    end
+
+    it "should set the return message of the packet correctly" do
+      @packet.return_msg.should match(/accepted/i)
+    end
+  end
+
+  describe "when parsing a congestion packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x01" )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+    end
+
+    it "should set the return code of the packet correctly" do
+      @packet.return_code.should == 0x01
+    end
+
+    it "should set the return message of the packet correctly" do
+      @packet.return_msg.should match(/rejected: congestion/i)
+    end
+  end
+
+  describe "when parsing a invalid topic ID packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x02" )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+    end
+
+    it "should set the return code of the packet correctly" do
+      @packet.return_code.should == 0x02
+    end
+
+    it "should set the return message of the packet correctly" do
+      @packet.return_msg.should match(/rejected: invalid topic ID/i)
+    end
+  end
+
+  describe "when parsing a 'not supported' packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x03" )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+    end
+
+    it "should set the return code of the packet correctly" do
+      @packet.return_code.should == 0x03
+    end
+
+    it "should set the return message of the packet correctly" do
+      @packet.return_msg.should match(/not supported/i)
+    end
+  end
+
+  describe "when parsing an unknown connection refused packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x10" )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+    end
+
+    it "should set the return code of the packet correctly" do
+      @packet.return_code.should == 0x10
+    end
+
+    it "should set the return message of the packet correctly" do
+      @packet.return_msg.should match(/rejected/i)
+    end
+  end
+end
+
 end
