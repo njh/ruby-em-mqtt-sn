@@ -174,6 +174,17 @@ module EventMachine::MQTTS
     end
 
     class Regack < Packet
+      attr_accessor :topic_id
+      attr_accessor :message_id
+      attr_accessor :return_code
+
+      def encode_body
+        [topic_id, message_id, return_code].pack('nnC')
+      end
+
+      def parse_body(buffer)
+        self.topic_id, self.message_id, self.return_code = buffer.unpack('nnC')
+      end
     end
 
     class Publish < Packet

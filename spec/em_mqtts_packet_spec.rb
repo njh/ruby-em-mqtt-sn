@@ -271,3 +271,44 @@ describe EventMachine::MQTTS::Packet::Register do
     end
   end
 end
+
+
+describe EventMachine::MQTTS::Packet::Regack do
+  it "should have the right type id" do
+    packet = EventMachine::MQTTS::Packet::Regack.new
+    packet.type_id.should == 0x0B
+  end
+
+  describe "when serialising a packet" do
+    it "should output the correct bytes for a register packet" do
+      packet = EventMachine::MQTTS::Packet::Regack.new(
+        :topic_id => 0x01,
+        :message_id => 0x02,
+        :return_code => 0x03
+      )
+      packet.to_s.should == "\x07\x0B\x00\x01\x00\x02\x03"
+    end
+  end
+
+  describe "when parsing a Register packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse( "\x07\x0B\x00\x01\x00\x02\x03" )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Regack
+    end
+
+    it "should set the topic id of the packet correctly" do
+      @packet.topic_id.should == 0x01
+    end
+
+    it "should set the message id of the packet correctly" do
+      @packet.message_id.should == 0x02
+    end
+
+    it "should set the topic name of the packet correctly" do
+      @packet.return_code.should == 0x03
+    end
+  end
+end
