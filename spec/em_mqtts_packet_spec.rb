@@ -126,6 +126,7 @@ describe EventMachine::MQTTS::Packet::Connect do
       )
     end
   end
+end
 
 describe EventMachine::MQTTS::Packet::Connack do
   it "should have the right type id" do
@@ -231,4 +232,42 @@ describe EventMachine::MQTTS::Packet::Connack do
   end
 end
 
+describe EventMachine::MQTTS::Packet::Register do
+  it "should have the right type id" do
+    packet = EventMachine::MQTTS::Packet::Register.new
+    packet.type_id.should == 0x0A
+  end
+
+  describe "when serialising a packet" do
+    it "should output the correct bytes for a register packet" do
+      packet = EventMachine::MQTTS::Packet::Register.new(
+        :topic_id => 0x01,
+        :message_id => 0x01,
+        :topic_name => 'test'
+      )
+      packet.to_s.should == "\x0A\x0A\x00\x01\x00\x01test"
+    end
+  end
+
+  describe "when parsing a Register packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse( "\x0A\x0A\x00\x01\x00\x01test" )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Register
+    end
+
+    it "should set the topic id of the packet correctly" do
+      @packet.topic_id.should == 0x01
+    end
+
+    it "should set the message id of the packet correctly" do
+      @packet.message_id.should == 0x01
+    end
+
+    it "should set the topic name of the packet correctly" do
+      @packet.topic_name.should == 'test'
+    end
+  end
 end

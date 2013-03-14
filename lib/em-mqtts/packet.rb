@@ -160,6 +160,17 @@ module EventMachine::MQTTS
     end
 
     class Register < Packet
+      attr_accessor :topic_id
+      attr_accessor :message_id
+      attr_accessor :topic_name
+
+      def encode_body
+        [topic_id, message_id, topic_name].pack('nna*')
+      end
+
+      def parse_body(buffer)
+        self.topic_id, self.message_id, self.topic_name = buffer.unpack('nna*')
+      end
     end
 
     class Regack < Packet
