@@ -128,6 +128,11 @@ describe EventMachine::MQTTS::Packet::Connect do
   end
 
 describe EventMachine::MQTTS::Packet::Connack do
+  it "should have the right type id" do
+    packet = EventMachine::MQTTS::Packet::Connack.new
+    packet.type_id.should == 0x05
+  end
+
   describe "when serialising a packet" do
     it "should output the correct bytes for a sucessful connection acknowledgement packet" do
       packet = EventMachine::MQTTS::Packet::Connack.new( :return_code => 0x00 )
