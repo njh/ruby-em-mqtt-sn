@@ -72,6 +72,9 @@ module EventMachine::MQTTS
       end
     end
 
+    def parse_body(buffer)
+    end
+
     protected
 
     def parse_flags(flags)
@@ -82,9 +85,6 @@ module EventMachine::MQTTS
       self.request_will = ((flags & 0x08) >> 3) == 0x01
       self.clean_session = ((flags & 0x04) >> 2) == 0x01
       self.topic_id_type = (flags & 0x03)
-    end
-
-    def parse_body(buffer)
     end
 
     # Get serialisation of packet's body (variable header and payload)
@@ -210,6 +210,7 @@ module EventMachine::MQTTS
     end
 
     class Disconnect < Packet
+      # No attributes
     end
 
   end

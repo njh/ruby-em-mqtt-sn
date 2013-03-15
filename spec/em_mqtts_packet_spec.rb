@@ -367,3 +367,29 @@ describe EventMachine::MQTTS::Packet::Publish do
   end
 
 end
+
+
+describe EventMachine::MQTTS::Packet::Disconnect do
+  it "should have the right type id" do
+    packet = EventMachine::MQTTS::Packet::Disconnect.new
+    packet.type_id.should == 0x18
+  end
+
+  describe "when serialising a packet" do
+    it "should output the correct bytes for a disconnect packet" do
+      packet = EventMachine::MQTTS::Packet::Disconnect.new
+      packet.to_s.should == "\x02\x18"
+    end
+  end
+
+  describe "when parsing a Publish packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse("\x02\x18")
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Disconnect
+    end
+  end
+
+end
