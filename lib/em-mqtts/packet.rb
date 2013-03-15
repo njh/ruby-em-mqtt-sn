@@ -73,7 +73,7 @@ module EventMachine::MQTTS
     end
 
     protected
-    
+
     def parse_flags(flags)
       self.duplicate = ((flags & 0x80) >> 7) == 0x01
       self.qos = (flags & 0x60) >> 5
@@ -91,7 +91,7 @@ module EventMachine::MQTTS
     def encode_body
       '' # No body by default
     end
-    
+
     def encode_flags
       flags = 0x00
       flags += 0x80 if duplicate
@@ -188,6 +188,25 @@ module EventMachine::MQTTS
     end
 
     class Publish < Packet
+      attr_accessor :topic_id
+      attr_accessor :message_id
+      attr_accessor :data
+
+      DEFAULTS = {
+        :duplicate => false,
+        :qos => 0,
+        :retain => false,
+        :message_id => 0x00
+      }
+
+      def encode_body
+        [encode_flags, topic_id, message_id, data].pack('Cnna*')
+      end
+
+      def parse_body(buffer)
+        flags, self.topic_id, self.message_id, self.data = buffer.unpack('Cnna*')
+        parse_flags(flags)
+      end
     end
 
     class Disconnect < Packet

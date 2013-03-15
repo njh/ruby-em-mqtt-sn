@@ -312,3 +312,58 @@ describe EventMachine::MQTTS::Packet::Regack do
     end
   end
 end
+
+
+describe EventMachine::MQTTS::Packet::Publish do
+  it "should have the right type id" do
+    packet = EventMachine::MQTTS::Packet::Publish.new
+    packet.type_id.should == 0x0C
+  end
+
+  describe "when serialising a packet" do
+    it "should output the correct bytes for a publish packet" do
+      packet = EventMachine::MQTTS::Packet::Publish.new(
+        :topic_id => 0x01,
+        :data => "Hello World"
+      )
+      packet.to_s.should == "\x12\x0C\x00\x00\x01\x00\x00Hello World"
+    end
+  end
+
+  describe "when parsing a Publish packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse(
+        "\x12\x0C\x00\x00\x01\x00\x00Hello World"
+      )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Publish
+    end
+
+    it "should set the QOS of the packet correctly" do
+      @packet.qos.should === 0
+    end
+
+    it "should set the QOS of the packet correctly" do
+      @packet.duplicate.should === false
+    end
+
+    it "should set the retain flag of the packet correctly" do
+      @packet.retain.should === false
+    end
+
+    it "should set the topic id of the packet correctly" do
+      @packet.topic_id.should === 0x01
+    end
+
+    it "should set the message id of the packet correctly" do
+      @packet.message_id.should === 0x0000
+    end
+
+    it "should set the topic name of the packet correctly" do
+      @packet.data.should == "Hello World"
+    end
+  end
+
+end
