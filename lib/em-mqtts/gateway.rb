@@ -19,7 +19,7 @@ class EventMachine::MQTTS::Gateway
   end
 
   def parse(args)
-    OptionParser.new("", 24, '  ') do |opts|
+    OptionParser.new("", 28, '  ') do |opts|
       opts.banner = "Usage: #{File.basename $0} [options]"
 
       opts.separator ""
@@ -33,8 +33,16 @@ class EventMachine::MQTTS::Gateway
         self.mqtts_address = address
       end
 
-      opts.on("-p", "--port [PORT]", "port number to run on (default: #{mqtts_port})") do |port|
+      opts.on("-p", "--port [PORT]", "UDP port number to run on (default: #{mqtts_port})") do |port|
         self.mqtts_port = port
+      end
+
+      opts.on("-A", "--broker-address [HOST]", "MQTT broker address to connect to (default: #{broker_address})") do |address|
+        self.broker_address = address
+      end
+
+      opts.on("-P", "--broker-port [PORT]", "MQTT broker port to connect to (default: #{broker_port})") do |port|
+        self.broker_port = port
       end
 
       opts.on_tail("-h", "--help", "show this message") do
@@ -58,11 +66,14 @@ class EventMachine::MQTTS::Gateway
       Signal.trap("TERM") { EventMachine.stop }
 
       logger.info("Starting MQTT-S gateway on UDP #{mqtts_address}:#{mqtts_port}")
+      logger.info("Broker address #{broker_address}:#{broker_port}")
       EventMachine.open_datagram_socket(
         mqtts_address,
         mqtts_port,
-        EventMachine::MQTTS::ServerConnection,
-        logger
+        EventMachine::MQTTS::GatewayConnection,
+        :logger => logger,
+        :broker_address => broker_address,
+        :broker_port => broker_port
       )
     end
   end

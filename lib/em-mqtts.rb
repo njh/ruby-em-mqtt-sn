@@ -1,6 +1,6 @@
 require 'eventmachine'
 require 'logger'
-require 'mqtt'
+require 'em-mqtt'
 
 require "em-mqtts/version"
 
@@ -15,9 +15,9 @@ module EventMachine::MQTTS
   class ProtocolException < MQTT::Exception
   end
 
-  autoload :ClientState,      'em-mqtts/client_state'
-  autoload :Gateway,          'em-mqtts/gateway'
-  autoload :Packet,           'em-mqtts/packet'
-  autoload :ServerConnection, 'em-mqtts/server_connection'
+  autoload :ClientState,       'em-mqtts/client_state'
+  autoload :Gateway,           'em-mqtts/gateway'
+  autoload :GatewayConnection, 'em-mqtts/gateway_connection'
+  autoload :Packet,            'em-mqtts/packet'
 
 end

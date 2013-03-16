@@ -1,12 +1,16 @@
 
-class EventMachine::MQTTS::ServerConnection < EventMachine::Connection
+class EventMachine::MQTTS::GatewayConnection < EventMachine::Connection
 
   attr_reader :logger
   attr_reader :clients
+  attr_reader :broker_address
+  attr_reader :broker_port
 
-  def initialize(logger)
-    @logger = logger
+  def initialize(attr)
     @clients = {}
+    attr.each_pair do |k,v|
+      instance_variable_set("@#{k}", v)
+    end
   end
 
   def receive_data(data)
@@ -19,13 +23,15 @@ class EventMachine::MQTTS::ServerConnection < EventMachine::Connection
   end
 
   def process_packet(packet)
-    logger.debug(packet.inspect)
-
     case packet
       when EventMachine::MQTTS::Packet::Connect
         connect(packet)
       when EventMachine::MQTTS::Packet::Register
         register(packet)
+      when EventMachine::MQTTS::Packet::Publish
+        publish(packet)
+      when EventMachine::MQTTS::Packet::Disconnect
+        disconnect(packet)
       else
         logger.warn("Unable to handle packet of type: #{packet.class}")
     end
@@ -47,8 +53,14 @@ class EventMachine::MQTTS::ServerConnection < EventMachine::Connection
     state.client_id = packet.client_id
     state.keep_alive = packet.keep_alive
 
+    state.broker_connection = EventMachine::MQTT::ClientConnection.connect(
+      @broker_address, @broker_port,
+      :client_id => packet.client_id,
+      :keep_alive => packet.keep_alive
+    )
+
     connack = EventMachine::MQTTS::Packet::Connack.new(
-        :return_code => 0x00
+      :return_code => 0x00
     )
     send_packet(connack)
   end
@@ -62,6 +74,27 @@ class EventMachine::MQTTS::ServerConnection < EventMachine::Connection
       :return_code => 0x00
     )
     send_packet(regack)
+  end
+
+  def publish(packet)
+    topic_name = state.topic_map[packet.topic_id]
+    logger.info("Publishing to '#{topic_name}': #{packet.data}")
+
+    state.broker_connection.publish(
+      topic_name,
+      packet.data,
+      packet.retain,
+      packet.qos
+    )
+  end
+
+  def disconnect(packet)
+    unless state.broker_connection.nil?
+      state.broker_connection.disconnect
+    end
+
+    disconnect = EventMachine::MQTTS::Packet::Disconnect.new
+    send_packet(disconnect)
   end
 
 end

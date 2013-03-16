@@ -5,7 +5,9 @@ class EventMachine::MQTTS::ClientState
   attr_accessor :port
   attr_accessor :client_id
   attr_accessor :keep_alive
+
   attr_accessor :topic_map
+  attr_accessor :broker_connection
 
   def initialize(address, port)
     @connected = false
@@ -14,7 +16,7 @@ class EventMachine::MQTTS::ClientState
     @client_id = nil
     @keep_alive = 10
     @topic_map = {}
+    @broker_connection = nil
   end
-  
 
 end
