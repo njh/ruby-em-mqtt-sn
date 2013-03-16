@@ -1,7 +1,50 @@
 $:.unshift(File.dirname(__FILE__))
 
 require 'spec_helper'
-require 'mqtt'
+
+describe EventMachine::MQTTS::Packet do
+
+  describe "when creating a new packet" do
+    it "should allow you to set the packet dup flag as a hash parameter" do
+      packet = EventMachine::MQTTS::Packet.new( :duplicate => true )
+      packet.duplicate.should be_true
+    end
+
+    it "should allow you to set the packet QOS level as a hash parameter" do
+      packet = EventMachine::MQTTS::Packet.new( :qos => 2 )
+      packet.qos.should == 2
+    end
+
+    it "should allow you to set the packet retain flag as a hash parameter" do
+      packet = EventMachine::MQTTS::Packet.new( :retain => true )
+      packet.retain.should be_true
+    end
+  end
+  
+  describe "getting the type id on a un-subclassed packet" do
+    it "should throw an exception" do
+      lambda {
+        EventMachine::MQTTS::Packet.new.type_id
+      }.should raise_error(
+        RuntimeError,
+        "Invalid packet type: EventMachine::MQTTS::Packet"
+      )
+    end
+  end
+
+  describe "Parsing a packet that does not match the packet length" do
+    it "should throw an exception" do
+      lambda {
+        packet = EventMachine::MQTTS::Packet.parse("\x02\x1834567")
+      }.should raise_error(
+        EventMachine::MQTTS::ProtocolException,
+        "Length of packet is not the same as the length header"
+      )
+    end  
+  end  
+
+end
+
 
 describe EventMachine::MQTTS::Packet::Connect do
   it "should have the right type id" do
@@ -123,6 +166,19 @@ describe EventMachine::MQTTS::Packet::Connect do
       }.should raise_error(
         EventMachine::MQTTS::ProtocolException,
         "Invalid packet type identifier: 255"
+      )
+    end
+  end
+
+  describe "when parsing a Connect packet an unsupport protocol ID" do
+    it "should throw an exception" do
+      lambda {
+        packet = EventMachine::MQTTS::Packet.parse(
+          "\016\004\014\005\000\017myclient"
+        )
+      }.should raise_error(
+        EventMachine::MQTTS::ProtocolException,
+        "Unsupported protocol ID number: 5"
       )
     end
   end
