@@ -1,7 +1,7 @@
 $:.unshift(File.dirname(__FILE__))
 
 require 'spec_helper'
-require 'em-mqtts'
+require 'em/mqtts/version'
 
 describe EventMachine::MQTTS do
 
