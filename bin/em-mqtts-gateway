@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
-
-$:.unshift File.dirname(__FILE__)+'/../lib'
-
 require 'rubygems'
-require 'em-mqtts'
+$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), "..", 'lib')))
+require 'em/mqtts'
 
 EventMachine::MQTTS::Gateway.new(ARGV).run
