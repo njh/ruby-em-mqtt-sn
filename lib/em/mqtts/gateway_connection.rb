@@ -66,10 +66,11 @@ class EventMachine::MQTTS::GatewayConnection < EventMachine::Connection
   end
 
   def register(packet)
-    state.topic_map[packet.topic_id] = packet.topic_name
+    topic_id = state.new_topic_id
+    state.topic_map[topic_id] = packet.topic_name
 
     regack = EventMachine::MQTTS::Packet::Regack.new(
-      :topic_id => packet.topic_id,
+      :topic_id => topic_id,
       :message_id => packet.message_id,
       :return_code => 0x00
     )
@@ -78,14 +79,18 @@ class EventMachine::MQTTS::GatewayConnection < EventMachine::Connection
 
   def publish(packet)
     topic_name = state.topic_map[packet.topic_id]
-    logger.info("Publishing to '#{topic_name}': #{packet.data}")
+    if topic_name
+      logger.info("Publishing to '#{topic_name}': #{packet.data}")
 
-    state.broker_connection.publish(
-      topic_name,
-      packet.data,
-      packet.retain,
-      packet.qos
-    )
+      state.broker_connection.publish(
+        topic_name,
+        packet.data,
+        packet.retain,
+        packet.qos
+      )
+    else
+      logger.warn("Invalid topic ID: #{packet.topic_id}")
+    end
   end
 
   def disconnect(packet)
