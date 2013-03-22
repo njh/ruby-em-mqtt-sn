@@ -213,6 +213,14 @@ module EventMachine::MQTTS
       # No attributes
     end
 
+    class Pingreq < Packet
+      # No attributes
+    end
+
+    class Pingresp < Packet
+      # No attributes
+    end
+
   end
 
 
@@ -238,8 +246,8 @@ module EventMachine::MQTTS
 #       0x13 => EventMachine::MQTTS::Packet::Suback,
 #       0x14 => EventMachine::MQTTS::Packet::Unsubscribe,
 #       0x15 => EventMachine::MQTTS::Packet::Unsuback,
-#       0x16 => EventMachine::MQTTS::Packet::Pingreq,
-#       0x17 => EventMachine::MQTTS::Packet::Pingresp,
+      0x16 => EventMachine::MQTTS::Packet::Pingreq,
+      0x17 => EventMachine::MQTTS::Packet::Pingresp,
       0x18 => EventMachine::MQTTS::Packet::Disconnect,
 #       0x1a => EventMachine::MQTTS::Packet::Willtopicupd,
 #       0x1b => EventMachine::MQTTS::Packet::Willtopicresp,

@@ -447,5 +447,54 @@ describe EventMachine::MQTTS::Packet::Disconnect do
       @packet.class.should == EventMachine::MQTTS::Packet::Disconnect
     end
   end
+end
 
+
+describe EventMachine::MQTTS::Packet::Pingreq do
+  it "should have the right type id" do
+    packet = EventMachine::MQTTS::Packet::Pingreq.new
+    packet.type_id.should == 0x16
+  end
+
+  describe "when serialising a packet" do
+    it "should output the correct bytes for a pingreq packet" do
+      packet = EventMachine::MQTTS::Packet::Pingreq.new
+      packet.to_s.should == "\x02\x16"
+    end
+  end
+
+  describe "when parsing a Pingreq packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse("\x02\x16")
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Pingreq
+    end
+  end
+end
+
+
+describe EventMachine::MQTTS::Packet::Pingresp do
+  it "should have the right type id" do
+    packet = EventMachine::MQTTS::Packet::Pingresp.new
+    packet.type_id.should == 0x17
+  end
+
+  describe "when serialising a packet" do
+    it "should output the correct bytes for a pingresp packet" do
+      packet = EventMachine::MQTTS::Packet::Pingresp.new
+      packet.to_s.should == "\x02\x17"
+    end
+  end
+
+  describe "when parsing a Pingresp packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse("\x02\x17")
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Pingresp
+    end
+  end
 end
