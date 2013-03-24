@@ -26,8 +26,8 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
   # Incoming packet received from client
   def process_packet(peername, packet)
-    logger.debug("Recieved MQTT-S: #{packet.inspect}")
-    
+    logger.debug("Recieved MQTT-S: #{packet.class}")
+
     if packet.class == EventMachine::MQTTS::Packet::Connect
       connect(peername, packet)
     else
@@ -57,24 +57,24 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
       @connections[peername].disconnect
     end
 
-    # Create a connection to the broker
+    # Create a TCP connection to the broker
     client_port, client_address = Socket.unpack_sockaddr_in(peername)
     connection = EventMachine::connect(
       broker_address, broker_port,
       EventMachine::MQTTS::BrokerConnection,
       self, client_address, client_port
     )
-    
+
     # Store the client ID
     connection.client_id = packet.client_id
 
-    # Send a MQTT connect packet
+    # Send a MQTT connect packet to the broker
     connection.send_packet MQTT::Packet::Connect.new(
       :client_id => packet.client_id,
       :keep_alive => packet.keep_alive,
       :clean_session => packet.clean_session
     )
-    
+
     # Add the connection to the table
     @connections[peername] = connection
   end
@@ -87,6 +87,11 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
         mqtts_packet = EventMachine::MQTTS::Packet::Connack.new(
           :return_code => packet.return_code
         )
+        if packet.return_code == 0
+          logger.info("Client #{connection.client_id} is now connected")
+        else
+          logger.info("Client #{connection.client_id} failed to connect: #{packet.return_msg}")
+        end
       else
         logger.warn("Unable to handle MQTT packet of type: #{packet.class}")
     end
