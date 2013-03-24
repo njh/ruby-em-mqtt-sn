@@ -9,7 +9,7 @@ class EventMachine::MQTTS::BrokerConnection < EventMachine::MQTT::Connection
     @client_address = client_address
     @client_port = client_port
     @gateway_handler = gateway_handler
-    @topic_id = 1
+    @topic_id = 0
     @topic_map = {}
   end
 
