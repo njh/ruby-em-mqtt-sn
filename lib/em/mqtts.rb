@@ -17,9 +17,9 @@ module EventMachine::MQTTS
 
   require "em/mqtts/version"
 
-  autoload :ClientState,       'em/mqtts/client_state'
+  autoload :BrokerConnection,  'em/mqtts/broker_connection'
   autoload :Gateway,           'em/mqtts/gateway'
-  autoload :GatewayConnection, 'em/mqtts/gateway_connection'
+  autoload :GatewayHandler,    'em/mqtts/gateway_handler'
   autoload :Packet,            'em/mqtts/packet'
 
 end

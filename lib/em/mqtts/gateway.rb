@@ -70,7 +70,7 @@ class EventMachine::MQTTS::Gateway
       EventMachine.open_datagram_socket(
         mqtts_address,
         mqtts_port,
-        EventMachine::MQTTS::GatewayConnection,
+        EventMachine::MQTTS::GatewayHandler,
         :logger => logger,
         :broker_address => broker_address,
         :broker_port => broker_port
