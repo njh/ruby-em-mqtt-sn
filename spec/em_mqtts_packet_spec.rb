@@ -438,7 +438,7 @@ describe EventMachine::MQTTS::Packet::Disconnect do
     end
   end
 
-  describe "when parsing a Publish packet" do
+  describe "when parsing a Disconnect packet" do
     before(:each) do
       @packet = EventMachine::MQTTS::Packet.parse("\x02\x18")
     end
