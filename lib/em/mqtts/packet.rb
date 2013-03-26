@@ -209,15 +209,15 @@ module EventMachine::MQTTS
       end
     end
 
-    class Disconnect < Packet
-      # No attributes
-    end
-
     class Pingreq < Packet
       # No attributes
     end
 
     class Pingresp < Packet
+      # No attributes
+    end
+
+    class Disconnect < Packet
       # No attributes
     end
 
