@@ -209,6 +209,21 @@ module EventMachine::MQTTS
       end
     end
 
+    class Subscribe < Packet
+      attr_accessor :topic_id
+      attr_accessor :message_id
+      attr_accessor :topic_name
+
+      def encode_body
+        [encode_flags, message_id, topic_name].pack('Cna*')
+      end
+
+      def parse_body(buffer)
+        flags, self.message_id, self.topic_name = buffer.unpack('Cna*')
+        parse_flags(flags)
+      end
+    end
+
     class Pingreq < Packet
       # No attributes
     end
@@ -242,7 +257,7 @@ module EventMachine::MQTTS
 #       0x0e => EventMachine::MQTTS::Packet::Pubcomp,
 #       0x0f => EventMachine::MQTTS::Packet::Pubrec,
 #       0x10 => EventMachine::MQTTS::Packet::Pubrel,
-#       0x12 => EventMachine::MQTTS::Packet::Subscribe,
+      0x12 => EventMachine::MQTTS::Packet::Subscribe,
 #       0x13 => EventMachine::MQTTS::Packet::Suback,
 #       0x14 => EventMachine::MQTTS::Packet::Unsubscribe,
 #       0x15 => EventMachine::MQTTS::Packet::Unsuback,

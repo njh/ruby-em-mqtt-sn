@@ -288,6 +288,7 @@ describe EventMachine::MQTTS::Packet::Connack do
   end
 end
 
+
 describe EventMachine::MQTTS::Packet::Register do
   it "should have the right type id" do
     packet = EventMachine::MQTTS::Packet::Register.new
@@ -346,7 +347,7 @@ describe EventMachine::MQTTS::Packet::Regack do
     end
   end
 
-  describe "when parsing a Register packet" do
+  describe "when parsing a REGACK packet" do
     before(:each) do
       @packet = EventMachine::MQTTS::Packet.parse( "\x07\x0B\x00\x01\x00\x02\x03" )
     end
@@ -421,7 +422,52 @@ describe EventMachine::MQTTS::Packet::Publish do
       @packet.data.should == "Hello World"
     end
   end
+end
 
+
+describe EventMachine::MQTTS::Packet::Subscribe do
+  it "should have the right type id" do
+    packet = EventMachine::MQTTS::Packet::Subscribe.new
+    packet.type_id.should == 0x12
+  end
+
+  describe "when serialising a packet" do
+    it "should output the correct bytes for a Subscribe packet" do
+      packet = EventMachine::MQTTS::Packet::Subscribe.new(
+        :duplicate => false,
+        :qos => 0,
+        :message_id => 0x02,
+        :topic_name => 'test'
+      )
+      packet.to_s.should == "\x09\x12\x00\x00\x02test"
+    end
+  end
+
+  describe "when parsing a Subscribe packet" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse( "\x09\x12\x00\x00\x03test" )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Subscribe
+    end
+
+    it "should set the message id of the packet correctly" do
+      @packet.message_id.should == 0x03
+    end
+
+    it "should set the message id of the packet correctly" do
+      @packet.qos.should == 0
+    end
+
+    it "should set the message id of the packet correctly" do
+      @packet.duplicate.should == false
+    end
+
+    it "should set the topic name of the packet correctly" do
+      @packet.topic_name.should == 'test'
+    end
+  end
 end
 
 
