@@ -224,6 +224,28 @@ module EventMachine::MQTTS
       end
     end
 
+    class Suback < Packet
+      attr_accessor :topic_id
+      attr_accessor :message_id
+      attr_accessor :return_code
+
+      DEFAULTS = {
+        :duplicate => false,
+        :qos => 0,
+        :retain => false,
+        :message_id => 0x00
+      }
+
+      def encode_body
+        [encode_flags, topic_id, message_id, return_code].pack('CnnC')
+      end
+
+      def parse_body(buffer)
+        flags, self.topic_id, self.message_id, self.return_code = buffer.unpack('CnnC')
+        parse_flags(flags)
+      end
+    end
+
     class Pingreq < Packet
       # No attributes
     end
@@ -258,7 +280,7 @@ module EventMachine::MQTTS
 #       0x0f => EventMachine::MQTTS::Packet::Pubrec,
 #       0x10 => EventMachine::MQTTS::Packet::Pubrel,
       0x12 => EventMachine::MQTTS::Packet::Subscribe,
-#       0x13 => EventMachine::MQTTS::Packet::Suback,
+      0x13 => EventMachine::MQTTS::Packet::Suback,
 #       0x14 => EventMachine::MQTTS::Packet::Unsubscribe,
 #       0x15 => EventMachine::MQTTS::Packet::Unsuback,
       0x16 => EventMachine::MQTTS::Packet::Pingreq,
