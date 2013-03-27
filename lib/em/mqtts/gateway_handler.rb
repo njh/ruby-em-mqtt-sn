@@ -38,6 +38,8 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
             register(connection, packet)
           when EventMachine::MQTTS::Packet::Publish
             publish(connection, packet)
+          when EventMachine::MQTTS::Packet::Subscribe
+            subscribe(connection, packet)
           when EventMachine::MQTTS::Packet::Disconnect
             disconnect(connection)
           else
@@ -84,6 +86,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
     logger.debug("Recieved MQTT: #{packet.inspect}")
     case packet
       when MQTT::Packet::Connack
+        # FIXME: re-map the return code
         mqtts_packet = EventMachine::MQTTS::Packet::Connack.new(
           :return_code => packet.return_code
         )
@@ -92,10 +95,32 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
         else
           logger.info("Client #{connection.client_id} failed to connect: #{packet.return_msg}")
         end
+      when MQTT::Packet::Suback
+        logger.info("Now subscribed")
+        # FIXME: use the request packet to work out topic name / id
+        mqtts_packet = EventMachine::MQTTS::Packet::Suback.new(
+          :topic_id => 1,
+          :qos => packet.granted_qos.first,
+          :message_id => packet.message_id,
+          :return_code => 0x00
+        )
+      when MQTT::Packet::Publish
+        logger.info("Recieved publish from broker")
+        mqtts_packet = EventMachine::MQTTS::Packet::Publish.new(
+          :duplicate => packet.duplicate,
+          :qos => packet.qos,
+          :retain => packet.retain,
+          :topic_id => connection.get_topic_id(packet.topic),
+          :message_id => packet.message_id,
+          :data => packet.payload
+        )
       else
         logger.warn("Unable to handle MQTT packet of type: #{packet.class}")
     end
-    send_datagram(mqtts_packet.to_s, connection.client_address, connection.client_port)
+    
+    unless mqtts_packet.nil?
+      send_datagram(mqtts_packet.to_s, connection.client_address, connection.client_port)
+    end
   end
 
   # REGISTER received from client
@@ -125,11 +150,23 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
       logger.warn("Invalid topic ID: #{packet.topic_id}")
     end
   end
+  
+  # SUBSCRIBE received from client - pass it on to the broker
+  def subscribe(connection, packet)
+    logger.info("Subscribing to '#{packet.topic_name}'")
+    mqtt_packet = MQTT::Packet::Subscribe.new(
+      :topics => packet.topic_name,
+      :message_id => packet.message_id,
+      :duplicate => packet.duplicate,
+      :qos => packet.qos
+    )
+    connection.send_packet(mqtt_packet)
+  end
 
   # Disconnect client from broker
   def disconnect(connection)
     if connection.connected?
-      logger.info("Disconnecting: #{connection.client_id}")
+      logger.info("Disconnected: #{connection.client_id}")
       mqtts_packet = EventMachine::MQTTS::Packet::Disconnect.new
       send_datagram(mqtts_packet.to_s, connection.client_address, connection.client_port)
       connection.disconnect

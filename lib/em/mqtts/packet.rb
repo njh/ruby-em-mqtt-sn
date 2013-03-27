@@ -230,9 +230,7 @@ module EventMachine::MQTTS
       attr_accessor :return_code
 
       DEFAULTS = {
-        :duplicate => false,
         :qos => 0,
-        :retain => false,
         :message_id => 0x00
       }
 
