@@ -40,6 +40,10 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
             publish(connection, packet)
           when EventMachine::MQTTS::Packet::Subscribe
             subscribe(connection, packet)
+          when EventMachine::MQTTS::Packet::Pingreq
+            connection.send_packet MQTT::Packet::Pingreq.new
+          when EventMachine::MQTTS::Packet::Pingresp
+            connection.send_packet MQTT::Packet::Pingresp.new
           when EventMachine::MQTTS::Packet::Disconnect
             disconnect(connection)
           else
@@ -114,6 +118,10 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
           :message_id => packet.message_id,
           :data => packet.payload
         )
+      when MQTT::Packet::Pingreq
+        mqtts_packet = EventMachine::MQTTS::Packet::Pingreq.new
+      when MQTT::Packet::Pingresp
+        mqtts_packet = EventMachine::MQTTS::Packet::Pingresp.new
       else
         logger.warn("Unable to handle MQTT packet of type: #{packet.class}")
     end
