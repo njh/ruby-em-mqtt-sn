@@ -8,7 +8,7 @@ module EventMachine::MQTTS
     attr_accessor :retain        # Retain flag
     attr_accessor :request_will  # Request that gateway prompts for Will
     attr_accessor :clean_session # When true, subscriptions are deleted after disconnect
-    attr_accessor :topic_id_type # One of :topic_id, :pre_defined or :short_name
+    attr_accessor :topic_id_type # One of :normal, :predefined or :short
 
     DEFAULTS = {}
 
@@ -84,7 +84,16 @@ module EventMachine::MQTTS
       self.retain = ((flags & 0x10) >> 4) == 0x01
       self.request_will = ((flags & 0x08) >> 3) == 0x01
       self.clean_session = ((flags & 0x04) >> 2) == 0x01
-      self.topic_id_type = (flags & 0x03)
+      case (flags & 0x03)
+        when 0x0
+          self.topic_id_type = :normal
+        when 0x1
+          self.topic_id_type = :predefined
+        when 0x2
+          self.topic_id_type = :short
+        else
+          self.topic_id_type = nil
+      end
     end
 
     # Get serialisation of packet's body (variable header and payload)
@@ -98,7 +107,32 @@ module EventMachine::MQTTS
       flags += 0x10 if retain
       flags += 0x08 if request_will
       flags += 0x04 if clean_session
+      case topic_id_type
+        when :normal
+          flags += 0x0
+        when :predefined
+          flags += 0x1
+        when :short
+          flags += 0x2
+      end
       return flags
+    end
+    
+    def encode_topic_id
+      if topic_id_type == :short
+        (topic_id[0].ord << 8) + topic_id[1].ord
+      else
+        topic_id
+      end
+    end
+    
+    def parse_topic_id(topic_id)
+      if topic_id_type == :short
+        int = topic_id.to_i
+        self.topic_id = [(int >> 8) & 0xFF, int & 0xFF].pack('CC')
+      else
+        self.topic_id = topic_id
+      end
     end
 
     class Connect < Packet
@@ -164,12 +198,18 @@ module EventMachine::MQTTS
       attr_accessor :message_id
       attr_accessor :topic_name
 
+      DEFAULTS = {
+        :message_id => 0x00,
+        :topic_id_type => :normal
+      }
+
       def encode_body
-        [topic_id, message_id, topic_name].pack('nna*')
+        [encode_topic_id, message_id, topic_name].pack('nna*')
       end
 
       def parse_body(buffer)
-        self.topic_id, self.message_id, self.topic_name = buffer.unpack('nna*')
+        topic_id, self.message_id, self.topic_name = buffer.unpack('nna*')
+        parse_topic_id(topic_id)
       end
     end
 
@@ -178,12 +218,18 @@ module EventMachine::MQTTS
       attr_accessor :message_id
       attr_accessor :return_code
 
+      DEFAULTS = {
+        :message_id => 0x00,
+        :topic_id_type => :normal
+      }
+
       def encode_body
-        [topic_id, message_id, return_code].pack('nnC')
+        [encode_topic_id, message_id, return_code].pack('nnC')
       end
 
       def parse_body(buffer)
-        self.topic_id, self.message_id, self.return_code = buffer.unpack('nnC')
+        topic_id, self.message_id, self.return_code = buffer.unpack('nnC')
+        parse_topic_id(topic_id)
       end
     end
 
@@ -196,16 +242,18 @@ module EventMachine::MQTTS
         :duplicate => false,
         :qos => 0,
         :retain => false,
-        :message_id => 0x00
+        :message_id => 0x00,
+        :topic_id_type => :normal
       }
 
       def encode_body
-        [encode_flags, topic_id, message_id, data].pack('Cnna*')
+        [encode_flags, encode_topic_id, message_id, data].pack('Cnna*')
       end
 
       def parse_body(buffer)
-        flags, self.topic_id, self.message_id, self.data = buffer.unpack('Cnna*')
+        flags, topic_id, self.message_id, self.data = buffer.unpack('Cnna*')
         parse_flags(flags)
+        parse_topic_id(topic_id)
       end
     end
 
@@ -213,6 +261,11 @@ module EventMachine::MQTTS
       attr_accessor :topic_id
       attr_accessor :message_id
       attr_accessor :topic_name
+
+      DEFAULTS = {
+        :message_id => 0x00,
+        :topic_id_type => :normal
+      }
 
       def encode_body
         [encode_flags, message_id, topic_name].pack('Cna*')
@@ -231,16 +284,18 @@ module EventMachine::MQTTS
 
       DEFAULTS = {
         :qos => 0,
-        :message_id => 0x00
+        :message_id => 0x00,
+        :topic_id_type => :normal
       }
 
       def encode_body
-        [encode_flags, topic_id, message_id, return_code].pack('CnnC')
+        [encode_flags, encode_topic_id, message_id, return_code].pack('CnnC')
       end
 
       def parse_body(buffer)
-        flags, self.topic_id, self.message_id, self.return_code = buffer.unpack('CnnC')
+        flags, topic_id, self.message_id, self.return_code = buffer.unpack('CnnC')
         parse_flags(flags)
+        parse_topic_id(topic_id)
       end
     end
 

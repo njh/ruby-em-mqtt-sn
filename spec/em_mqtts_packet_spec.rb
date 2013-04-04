@@ -315,6 +315,10 @@ describe EventMachine::MQTTS::Packet::Register do
       @packet.class.should == EventMachine::MQTTS::Packet::Register
     end
 
+    it "should set the topic id type of the packet correctly" do
+      @packet.topic_id_type.should == :normal
+    end
+
     it "should set the topic id of the packet correctly" do
       @packet.topic_id.should == 0x01
     end
@@ -356,6 +360,10 @@ describe EventMachine::MQTTS::Packet::Regack do
       @packet.class.should == EventMachine::MQTTS::Packet::Regack
     end
 
+    it "should set the topic id type of the packet correctly" do
+      @packet.topic_id_type.should == :normal
+    end
+
     it "should set the topic id of the packet correctly" do
       @packet.topic_id.should == 0x01
     end
@@ -377,17 +385,29 @@ describe EventMachine::MQTTS::Packet::Publish do
     packet.type_id.should == 0x0C
   end
 
-  describe "when serialising a packet" do
+  describe "when serialising a packet with a normal topic id type" do
     it "should output the correct bytes for a publish packet" do
       packet = EventMachine::MQTTS::Packet::Publish.new(
         :topic_id => 0x01,
+        :topic_id_type => :normal,
         :data => "Hello World"
       )
       packet.to_s.should == "\x12\x0C\x00\x00\x01\x00\x00Hello World"
     end
   end
 
-  describe "when parsing a Publish packet" do
+  describe "when serialising a packet with a short topic id type" do
+    it "should output the correct bytes for a publish packet" do
+      packet = EventMachine::MQTTS::Packet::Publish.new(
+        :topic_id => 'tt',
+        :topic_id_type => :short,
+        :data => "Hello World"
+      )
+      packet.to_s.should == "\x12\x0C\x02tt\x00\x00Hello World"
+    end
+  end
+
+  describe "when parsing a Publish packet with a normal topic id" do
     before(:each) do
       @packet = EventMachine::MQTTS::Packet.parse(
         "\x12\x0C\x00\x00\x01\x00\x00Hello World"
@@ -411,7 +431,51 @@ describe EventMachine::MQTTS::Packet::Publish do
     end
 
     it "should set the topic id of the packet correctly" do
+      @packet.topic_id_type.should === :normal
+    end
+
+    it "should set the topic id of the packet correctly" do
       @packet.topic_id.should === 0x01
+    end
+
+    it "should set the message id of the packet correctly" do
+      @packet.message_id.should === 0x0000
+    end
+
+    it "should set the topic name of the packet correctly" do
+      @packet.data.should == "Hello World"
+    end
+  end
+
+  describe "when parsing a Publish packet with a short topic id" do
+    before(:each) do
+      @packet = EventMachine::MQTTS::Packet.parse(
+        "\x12\x0C\x02tt\x00\x00Hello World"
+      )
+    end
+
+    it "should correctly create the right type of packet object" do
+      @packet.class.should == EventMachine::MQTTS::Packet::Publish
+    end
+
+    it "should set the QOS of the packet correctly" do
+      @packet.qos.should === 0
+    end
+
+    it "should set the QOS of the packet correctly" do
+      @packet.duplicate.should === false
+    end
+
+    it "should set the retain flag of the packet correctly" do
+      @packet.retain.should === false
+    end
+
+    it "should set the topic id type of the packet correctly" do
+      @packet.topic_id_type.should === :short
+    end
+
+    it "should set the topic id of the packet correctly" do
+      @packet.topic_id.should === 'tt'
     end
 
     it "should set the message id of the packet correctly" do
@@ -500,6 +564,10 @@ describe EventMachine::MQTTS::Packet::Suback do
 
     it "should set the topic id of the packet correctly" do
       @packet.qos.should == 0
+    end
+
+    it "should set the topic id type of the packet correctly" do
+      @packet.topic_id_type.should == :normal
     end
 
     it "should set the topic id of the packet correctly" do
