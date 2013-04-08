@@ -133,13 +133,17 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
   # REGISTER received from client
   def register(connection, packet)
-    topic_id = connection.get_topic_id(packet.topic_name)
-
     regack = EventMachine::MQTTS::Packet::Regack.new(
-      :topic_id => topic_id,
       :message_id => packet.message_id,
-      :return_code => 0x00
     )
+
+    topic_id = connection.get_topic_id(packet.topic_name)
+    unless topic_id.nil?
+      regack.return_code => 0x00  # Accepted
+      regack.topic_id = topic_id
+    else
+       regack.return_code => 0x02  # Rejected: invalid topic ID
+    end
     send_data(regack.to_s)
   end
 
