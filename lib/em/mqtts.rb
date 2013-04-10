@@ -2,7 +2,7 @@ $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..')))
 
 require 'eventmachine'
 require 'logger'
-require 'em-mqtt'
+require 'em/mqtt'
 
 module EventMachine::MQTTS
 

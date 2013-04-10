@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency     'eventmachine'
   gem.add_runtime_dependency     'mqtt',        '>= 0.0.8'
-  gem.add_runtime_dependency     'em-mqtt',     '>= 0.0.2'
+  gem.add_runtime_dependency     'em-mqtt',     '>= 0.0.3'
   gem.add_development_dependency 'bundler',     '>= 1.0.14'
   gem.add_development_dependency 'yard',        '>= 0.7.2'
   gem.add_development_dependency 'rake',        '>= 0.8.7'
