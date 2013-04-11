@@ -110,11 +110,20 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
         )
       when MQTT::Packet::Publish
         logger.info("Recieved publish from broker")
+        if packet.topic.length == 2
+          topic_id_type = :short
+          topic_id = packet.topic
+        else
+          # FIXME: send register if this is a new topic
+          topic_id_type = :normal
+          topic_id = connection.get_topic_id(packet.topic)
+        end
         mqtts_packet = EventMachine::MQTTS::Packet::Publish.new(
           :duplicate => packet.duplicate,
           :qos => packet.qos,
           :retain => packet.retain,
-          :topic_id => connection.get_topic_id(packet.topic),
+          :topic_id_type => topic_id_type,
+          :topic_id => topic_id,
           :message_id => packet.message_id,
           :data => packet.payload
         )
@@ -134,7 +143,8 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
   # REGISTER received from client
   def register(connection, packet)
     regack = EventMachine::MQTTS::Packet::Regack.new(
-      :message_id => packet.message_id,
+      :topic_id_type => :normal,
+      :message_id => packet.message_id
     )
 
     topic_id = connection.get_topic_id(packet.topic_name)
@@ -149,7 +159,12 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
   # PUBLISH received from client - pass it on to the broker
   def publish(connection, packet)
-    topic_name = connection.get_topic_name(packet.topic_id)
+    if packet.topic_id_type == :short
+      topic_name = packet.topic_id
+    elsif packet.topic_id_type == :normal
+      topic_name = connection.get_topic_name(packet.topic_id)
+    end
+
     if topic_name
       logger.info("Publishing to '#{topic_name}': #{packet.data}")
       connection.send_packet MQTT::Packet::Publish.new(
@@ -159,6 +174,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
         :qos => packet.qos
       )
     else
+      # FIXME: disconnect?
       logger.warn("Invalid topic ID: #{packet.topic_id}")
     end
   end
