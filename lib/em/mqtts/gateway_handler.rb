@@ -139,10 +139,10 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
     topic_id = connection.get_topic_id(packet.topic_name)
     unless topic_id.nil?
-      regack.return_code => 0x00  # Accepted
+      regack.return_code = 0x00   # Accepted
       regack.topic_id = topic_id
     else
-       regack.return_code => 0x02  # Rejected: invalid topic ID
+       regack.return_code = 0x02  # Rejected: invalid topic ID
     end
     send_data(regack.to_s)
   end
