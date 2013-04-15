@@ -189,6 +189,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
       :duplicate => packet.duplicate,
       :qos => packet.qos
     )
+    connection.add_to_pending(packet)
     connection.send_packet(mqtt_packet)
   end
 
