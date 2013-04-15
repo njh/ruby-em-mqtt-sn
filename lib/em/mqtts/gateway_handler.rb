@@ -100,14 +100,21 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
           logger.info("Client #{connection.client_id} failed to connect: #{packet.return_msg}")
         end
       when MQTT::Packet::Suback
-        logger.info("Now subscribed")
-        # FIXME: use the request packet to work out topic name / id
-        mqtts_packet = EventMachine::MQTTS::Packet::Suback.new(
-          :topic_id => 1,
-          :qos => packet.granted_qos.first,
-          :message_id => packet.message_id,
-          :return_code => 0x00
-        )
+        # Check that it is a response to a request we made
+        request = connection.remove_from_pending(packet.message_id)
+        if request
+          logger.info("Client #{connection.client_id} now subscribed to '#{request.topic_name}'")
+          topic_id_type, topic_id = connection.get_topic_id(request.topic_name)
+          mqtts_packet = EventMachine::MQTTS::Packet::Suback.new(
+            :topic_id_type => topic_id_type,
+            :topic_id => topic_id,
+            :qos => packet.granted_qos.first,
+            :message_id => packet.message_id,
+            :return_code => 0x00
+          )
+        else
+          logger.warn("Received Suback from broker for something we didn't request: #{packet.inspect}")
+        end
       when MQTT::Packet::Publish
         logger.info("Recieved publish from broker")
         # FIXME: send register if this is a new topic
