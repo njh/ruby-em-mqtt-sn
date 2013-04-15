@@ -128,7 +128,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
       else
         logger.warn("Unable to handle MQTT packet of type: #{packet.class}")
     end
-    
+
     unless mqtts_packet.nil?
       send_datagram(mqtts_packet.to_s, connection.client_address, connection.client_port)
     end
@@ -172,7 +172,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
       logger.warn("Invalid topic ID: #{packet.topic_id}")
     end
   end
-  
+
   # SUBSCRIBE received from client - pass it on to the broker
   def subscribe(connection, packet)
     logger.info("Subscribing to '#{packet.topic_name}'")

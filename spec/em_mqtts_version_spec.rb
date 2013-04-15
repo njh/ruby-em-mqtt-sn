@@ -13,11 +13,10 @@ describe EventMachine::MQTTS do
     it "should be a string" do
       EventMachine::MQTTS::VERSION.should be_a(String)
     end
- 
+
     it "should be in the format x.y.z" do
       EventMachine::MQTTS::VERSION.should =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
     end
-  
-  end   
+  end
 
 end

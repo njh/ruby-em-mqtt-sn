@@ -20,7 +20,7 @@ describe EventMachine::MQTTS::Packet do
       packet.retain.should be_true
     end
   end
-  
+
   describe "getting the type id on a un-subclassed packet" do
     it "should throw an exception" do
       lambda {
@@ -40,8 +40,8 @@ describe EventMachine::MQTTS::Packet do
         EventMachine::MQTTS::ProtocolException,
         "Length of packet is not the same as the length header"
       )
-    end  
-  end  
+    end
+  end
 
 end
 

@@ -23,7 +23,7 @@ class EventMachine::MQTTS::BrokerConnection < EventMachine::MQTT::Connection
     if packet.class == MQTT::Packet::Connack and packet.return_code == 0
       @state = :connected
     end
-  
+
     @gateway_handler.relay_from_broker(self, packet)
   end
 

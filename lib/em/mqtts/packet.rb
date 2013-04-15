@@ -117,7 +117,7 @@ module EventMachine::MQTTS
       end
       return flags
     end
-    
+
     def encode_topic_id
       if topic_id_type == :short
         (topic_id[0].ord << 8) + topic_id[1].ord
@@ -125,7 +125,7 @@ module EventMachine::MQTTS
         topic_id
       end
     end
-    
+
     def parse_topic_id(topic_id)
       if topic_id_type == :short
         int = topic_id.to_i
