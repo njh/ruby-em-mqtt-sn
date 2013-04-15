@@ -110,14 +110,8 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
         )
       when MQTT::Packet::Publish
         logger.info("Recieved publish from broker")
-        if packet.topic.length == 2
-          topic_id_type = :short
-          topic_id = packet.topic
-        else
-          # FIXME: send register if this is a new topic
-          topic_id_type = :normal
-          topic_id = connection.get_topic_id(packet.topic)
-        end
+        # FIXME: send register if this is a new topic
+        topic_id_type, topic_id = connection.get_topic_id(packet.topic)
         mqtts_packet = EventMachine::MQTTS::Packet::Publish.new(
           :duplicate => packet.duplicate,
           :qos => packet.qos,

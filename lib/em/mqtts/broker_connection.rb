@@ -29,15 +29,21 @@ class EventMachine::MQTTS::BrokerConnection < EventMachine::MQTT::Connection
 
   # Get the topic ID for a topic name
   def get_topic_id(name)
-    # FIXME: improve this
-    @topic_map.each_pair do |key,value|
-      return key if value == name
+    if name.length == 2
+      return :short, name
+    else
+      # FIXME: improve this
+      @topic_map.each_pair do |key,value|
+        if value == name
+          return :normal, key
+        end
+      end
+      @topic_id += 1
+      @topic_map[@topic_id] = name
+      return :normal, @topic_id
     end
-    @topic_id += 1
-    @topic_map[@topic_id] = name
-    return @topic_id
   end
-  
+
   # Get the topic name for a topic ID
   def get_topic_name(id)
     @topic_map[id]
