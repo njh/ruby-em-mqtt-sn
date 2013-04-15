@@ -141,7 +141,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
       :message_id => packet.message_id
     )
 
-    topic_id = connection.get_topic_id(packet.topic_name)
+    topic_id_type, topic_id = connection.get_topic_id(packet.topic_name)
     unless topic_id.nil?
       regack.return_code = 0x00   # Accepted
       regack.topic_id = topic_id
