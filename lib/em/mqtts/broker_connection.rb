@@ -20,7 +20,7 @@ class EventMachine::MQTTS::BrokerConnection < EventMachine::MQTT::Connection
     @gateway_handler.disconnect(self)
   end
 
-  # Incoming packet from broker has been recieved
+  # Incoming packet from broker has been received
   def process_packet(packet)
     if packet.class == MQTT::Packet::Connack and packet.return_code == 0
       @state = :connected

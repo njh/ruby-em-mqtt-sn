@@ -26,7 +26,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
   # Incoming packet received from client
   def process_packet(peername, packet)
-    logger.debug("Recieved MQTT-S: #{packet.class}")
+    logger.debug("Received MQTT-S: #{packet.class}")
 
     if packet.class == EventMachine::MQTTS::Packet::Connect
       connect(peername, packet)
@@ -50,7 +50,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
             logger.warn("Unable to handle MQTT-S packet of type: #{packet.class}")
         end
       else
-        logger.warn("Recieved MQTT-S packet of type: #{packet.class} while not connected")
+        logger.warn("Received MQTT-S packet of type: #{packet.class} while not connected")
       end
     end
   end
@@ -59,7 +59,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
   def connect(peername, packet)
     # If connection already exists, disconnect first
     if @connections.has_key?(peername)
-      logger.warn("Recieved CONNECT while already connected")
+      logger.warn("Received CONNECT while already connected")
       @connections[peername].disconnect
     end
 
@@ -87,7 +87,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
   # Handle a MQTT packet coming back from the broker
   def relay_from_broker(connection, packet)
-    logger.debug("Recieved MQTT: #{packet.inspect}")
+    logger.debug("Received MQTT: #{packet.inspect}")
     case packet
       when MQTT::Packet::Connack
         # FIXME: re-map the return code
@@ -116,7 +116,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
           logger.warn("Received Suback from broker for something we didn't request: #{packet.inspect}")
         end
       when MQTT::Packet::Publish
-        logger.info("Recieved publish from broker")
+        logger.info("Received publish from broker")
         # FIXME: send register if this is a new topic
         topic_id_type, topic_id = connection.get_topic_id(packet.topic)
         mqtts_packet = EventMachine::MQTTS::Packet::Publish.new(
