@@ -14,6 +14,9 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
     attr.each_pair do |k,v|
       instance_variable_set("@#{k}", v)
     end
+
+    # Run the cleanup task periodically
+    EventMachine.add_periodic_timer(10) { cleanup }
   end
 
   # UDP packet received by gateway
@@ -200,6 +203,16 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
       mqtts_packet = EventMachine::MQTTS::Packet::Disconnect.new
       send_datagram(mqtts_packet.to_s, connection.client_address, connection.client_port)
       connection.disconnect
+    end
+  end
+
+  # Periodic task to cleanup dead connections
+  def cleanup
+    connections.each_pair do |key,connection|
+      unless connection.connected?
+        logger.debug("Destroying connection: #{connection.client_id}")
+        @connections.delete(key)
+      end
     end
   end
 end
