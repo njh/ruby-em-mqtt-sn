@@ -10,10 +10,10 @@ Gem::Specification.new do |gem|
   gem.email       = 'njh@aelius.com'
   gem.homepage    = 'http://github.com/njh/ruby-em-mqtts'
   gem.summary     = 'MQTT-S for EventMachine'
-  gem.description = 'This gem adds MQTT-S protocol support to EventMachine.'
+  gem.description = 'This gem adds MQTT-S protocol and gateway support to EventMachine.'
   gem.license     = 'Ruby' if gem.respond_to?(:license=)
 
-  gem.files         = %w(README COPYING GPL NEWS) + Dir.glob('lib/**/*.rb')
+  gem.files         = %w(README.md COPYING GPL NEWS.md) + Dir.glob('lib/**/*.rb')
   gem.test_files    = Dir.glob('spec/*_spec.rb')
   gem.executables   = %w(em-mqtts-gateway)
   gem.require_paths = %w(lib)
