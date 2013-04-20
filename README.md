@@ -21,6 +21,7 @@ It also includes a MQTT-S gateway, to connect MQTT-S clients to a standard [MQTT
 Example
 -------
 
+    $ sudo gem install em-mqtts
     $ em-mqtts-gateway -A test.mosquitto.org
     I, [2013-04-20T12:08:56.850572 #29588]  INFO -- : Starting MQTT-S gateway on UDP 0.0.0.0:1883
     I, [2013-04-20T12:08:56.850646 #29588]  INFO -- : Broker address test.mosquitto.org:1883
