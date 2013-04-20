@@ -98,15 +98,15 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
           :return_code => packet.return_code
         )
         if packet.return_code == 0
-          logger.info("Client #{connection.client_id} is now connected")
+          logger.info("#{connection.client_id} is now connected")
         else
-          logger.info("Client #{connection.client_id} failed to connect: #{packet.return_msg}")
+          logger.info("#{connection.client_id} failed to connect: #{packet.return_msg}")
         end
       when MQTT::Packet::Suback
         # Check that it is a response to a request we made
         request = connection.remove_from_pending(packet.message_id)
         if request
-          logger.info("Client #{connection.client_id} now subscribed to '#{request.topic_name}'")
+          logger.debug("#{connection.client_id} now subscribed to '#{request.topic_name}'")
           topic_id_type, topic_id = connection.get_topic_id(request.topic_name)
           mqtts_packet = EventMachine::MQTTS::Packet::Suback.new(
             :topic_id_type => topic_id_type,
@@ -119,7 +119,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
           logger.warn("Received Suback from broker for something we didn't request: #{packet.inspect}")
         end
       when MQTT::Packet::Publish
-        logger.info("Received publish from broker")
+        logger.info("#{connection.client_id} recieved publish to '#{packet.topic}'")
         # FIXME: send register if this is a new topic
         topic_id_type, topic_id = connection.get_topic_id(packet.topic)
         mqtts_packet = EventMachine::MQTTS::Packet::Publish.new(
@@ -170,7 +170,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
     end
 
     if topic_name
-      logger.info("Publishing to '#{topic_name}': #{packet.data}")
+      logger.info("#{connection.client_id} publishing to '#{topic_name}'")
       connection.send_packet MQTT::Packet::Publish.new(
         :topic => topic_name,
         :payload => packet.data,
@@ -185,7 +185,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
   # SUBSCRIBE received from client - pass it on to the broker
   def subscribe(connection, packet)
-    logger.info("Subscribing to '#{packet.topic_name}'")
+    logger.info("#{connection.client_id} subscribing to '#{packet.topic_name}'")
     mqtt_packet = MQTT::Packet::Subscribe.new(
       :topics => packet.topic_name,
       :message_id => packet.message_id,
