@@ -34,6 +34,13 @@ Example
     I, [2013-04-20T12:09:22.815726 #29588]  INFO -- : Disconnected: mqtts-tools-29713
 
 
+License
+-------
+
+The em-mqtts gem is licensed under the terms of the MIT license.
+See the file LICENSE for details.
+
+
 Contact
 -------
 
@@ -41,7 +48,6 @@ Contact
 * Email:     njh@aelius.com
 * Twitter:   [@njh]
 * Home Page: http://www.aelius.com/njh/
-* License:   Distributes under the same terms as Ruby
 
 
 [MQTT]:                     http://mqtt.org/
