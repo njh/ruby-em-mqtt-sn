@@ -1,12 +1,12 @@
-ruby-em-mqtts
-=============
+ruby-em-mqtt-sn
+===============
 
-This gem adds MQTT-S (MQTT For Sensor Networks) protocol support to EventMachine,
+This gem adds MQTT-SN (MQTT For Sensor Networks) protocol support to EventMachine,
 an event-processing library for Ruby.
 
-It also includes a MQTT-S gateway, to connect MQTT-S clients to a standard [MQTT] broker.
+It also includes a MQTT-SN gateway, to connect MQTT-SN clients to a standard [MQTT] broker.
 
-    Usage: em-mqtts-gateway [options]
+    Usage: em-mqtt-sn-gateway [options]
 
     Options:
       -D, --debug                  turn on debug logging
@@ -21,23 +21,23 @@ It also includes a MQTT-S gateway, to connect MQTT-S clients to a standard [MQTT
 Example
 -------
 
-    $ sudo gem install em-mqtts
-    $ em-mqtts-gateway -A test.mosquitto.org
+    $ sudo gem install em-mqtt-sn
+    $ em-mqtt-sn-gateway -A test.mosquitto.org
     I, [2013-04-20T12:08:56.850572 #29588]  INFO -- : Starting MQTT-S gateway on UDP 0.0.0.0:1883
     I, [2013-04-20T12:08:56.850646 #29588]  INFO -- : Broker address test.mosquitto.org:1883
-    I, [2013-04-20T12:09:00.577446 #29588]  INFO -- : mqtts-tools-29710 is now connected
-    I, [2013-04-20T12:09:00.578032 #29588]  INFO -- : mqtts-tools-29710 subscribing to 'test'
-    I, [2013-04-20T12:09:00.601937 #29588]  INFO -- : mqtts-tools-29710 recieved publish to 'test'
-    I, [2013-04-20T12:09:07.770269 #29588]  INFO -- : mqtts-tools-29713 is now connected
-    I, [2013-04-20T12:09:07.770733 #29588]  INFO -- : mqtts-tools-29713 publishing to 'test'
-    I, [2013-04-20T12:09:07.783940 #29588]  INFO -- : mqtts-tools-29710 recieved publish to 'test'
-    I, [2013-04-20T12:09:22.815726 #29588]  INFO -- : Disconnected: mqtts-tools-29713
+    I, [2013-04-20T12:09:00.577446 #29588]  INFO -- : mqtt-sn-tools-29710 is now connected
+    I, [2013-04-20T12:09:00.578032 #29588]  INFO -- : mqtt-sn-tools-29710 subscribing to 'test'
+    I, [2013-04-20T12:09:00.601937 #29588]  INFO -- : mqtt-sn-tools-29710 recieved publish to 'test'
+    I, [2013-04-20T12:09:07.770269 #29588]  INFO -- : mqtt-sn-tools-29713 is now connected
+    I, [2013-04-20T12:09:07.770733 #29588]  INFO -- : mqtt-sn-tools-29713 publishing to 'test'
+    I, [2013-04-20T12:09:07.783940 #29588]  INFO -- : mqtt-sn-tools-29710 recieved publish to 'test'
+    I, [2013-04-20T12:09:22.815726 #29588]  INFO -- : Disconnected: mqtt-sn-tools-29713
 
 
 License
 -------
 
-The em-mqtts gem is licensed under the terms of the MIT license.
+The em-mqtt-sn gem is licensed under the terms of the MIT license.
 See the file LICENSE for details.
 
 
