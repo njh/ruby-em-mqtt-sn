@@ -6,5 +6,6 @@ require 'em/mqtt-sn'
 
 Bundler.require(:default, :development)
 
-# This is needed by rcov
-require 'rspec/autorun'
+unless RUBY_VERSION =~ /^1\.8/
+  SimpleCov.start
+end
