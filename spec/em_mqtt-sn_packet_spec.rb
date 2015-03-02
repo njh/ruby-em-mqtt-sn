@@ -12,20 +12,20 @@ describe EventMachine::MQTTSN::Packet do
 
     it "should allow you to set the packet QOS level as a hash parameter" do
       packet = EventMachine::MQTTSN::Packet.new( :qos => 2 )
-      packet.qos.should == 2
+      expect(packet.qos).to eq(2)
     end
 
     it "should allow you to set the packet retain flag as a hash parameter" do
       packet = EventMachine::MQTTSN::Packet.new( :retain => true )
-      packet.retain.should be_truthy
+      expect(packet.retain).to be_truthy
     end
   end
 
   describe "getting the type id on a un-subclassed packet" do
     it "should throw an exception" do
-      lambda {
+      expect {
         EventMachine::MQTTSN::Packet.new.type_id
-      }.should raise_error(
+      }.to raise_error(
         RuntimeError,
         "Invalid packet type: EventMachine::MQTTSN::Packet"
       )
@@ -34,9 +34,9 @@ describe EventMachine::MQTTSN::Packet do
 
   describe "Parsing a packet that does not match the packet length" do
     it "should throw an exception" do
-      lambda {
+      expect {
         packet = EventMachine::MQTTSN::Packet.parse("\x02\x1834567")
-      }.should raise_error(
+      }.to raise_error(
         EventMachine::MQTTSN::ProtocolException,
         "Length of packet is not the same as the length header"
       )
@@ -49,7 +49,7 @@ end
 describe EventMachine::MQTTSN::Packet::Connect do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Connect.new
-    packet.type_id.should == 0x04
+    expect(packet.type_id).to eq(0x04)
   end
 
   describe "when serialising a packet" do
@@ -57,7 +57,7 @@ describe EventMachine::MQTTSN::Packet::Connect do
       packet = EventMachine::MQTTSN::Packet::Connect.new(
         :client_id => 'mqtts-client-pub'
       )
-      packet.to_s.should == "\026\004\004\001\000\017mqtts-client-pub"
+      expect(packet.to_s).to eq("\026\004\004\001\000\017mqtts-client-pub")
     end
 
     it "should output the correct bytes for a packet with clean session turned off" do
@@ -65,13 +65,13 @@ describe EventMachine::MQTTSN::Packet::Connect do
         :client_id => 'myclient',
         :clean_session => false
       )
-      packet.to_s.should == "\016\004\000\001\000\017myclient"
+      expect(packet.to_s).to eq("\016\004\000\001\000\017myclient")
     end
 
     it "should throw an exception when there is no client identifier" do
-      lambda {
+      expect {
         EventMachine::MQTTSN::Packet::Connect.new.to_s
-      }.should raise_error(
+      }.to raise_error(
         'Invalid client identifier when serialising packet'
       )
     end
@@ -82,7 +82,7 @@ describe EventMachine::MQTTSN::Packet::Connect do
         :request_will => true,
         :clean_session => true
       )
-      packet.to_s.should == "\016\004\014\001\000\017myclient"
+      expect(packet.to_s).to eq("\016\004\014\001\000\017myclient")
     end
 
     it "should output the correct bytes for with a custom keep alive" do
@@ -92,7 +92,7 @@ describe EventMachine::MQTTSN::Packet::Connect do
         :clean_session => true,
         :keep_alive => 30
       )
-      packet.to_s.should == "\016\004\014\001\000\036myclient"
+      expect(packet.to_s).to eq("\016\004\014\001\000\036myclient")
     end
   end
 
@@ -104,23 +104,23 @@ describe EventMachine::MQTTSN::Packet::Connect do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Connect
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Connect)
     end
 
     it "should not have the request will flag set" do
-      @packet.request_will.should be_falsy
+      expect(@packet.request_will).to be_falsy
     end
 
     it "shoul have the clean session flag set" do
-      @packet.clean_session.should be_truthy
+      expect(@packet.clean_session).to be_truthy
     end
 
     it "should set the Keep Alive timer of the packet correctly" do
-      @packet.keep_alive.should == 0
+      expect(@packet.keep_alive).to eq(0)
     end
 
     it "should set the Client Identifier of the packet correctly" do
-      @packet.client_id.should == 'mqtts-client-pub'
+      expect(@packet.client_id).to eq('mqtts-client-pub')
     end
   end
 
@@ -132,7 +132,7 @@ describe EventMachine::MQTTSN::Packet::Connect do
     end
 
     it "should set the clean session flag" do
-      @packet.clean_session.should be_truthy
+      expect(@packet.clean_session).to be_truthy
     end
   end
 
@@ -144,26 +144,26 @@ describe EventMachine::MQTTSN::Packet::Connect do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Connect
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Connect)
     end
     it "should set the Client Identifier of the packet correctly" do
-      @packet.client_id.should == 'myclient'
+      expect(@packet.client_id).to eq('myclient')
     end
 
     it "should set the clean session flag should be set" do
-      @packet.clean_session.should be_truthy
+      expect(@packet.clean_session).to be_truthy
     end
 
     it "should set the Will retain flag should be false" do
-      @packet.request_will.should be_truthy
+      expect(@packet.request_will).to be_truthy
     end
   end
 
   context "that has an invalid type identifier" do
     it "should throw an exception" do
-      lambda {
+      expect {
         EventMachine::MQTTSN::Packet.parse( "\x02\xFF" )
-      }.should raise_error(
+      }.to raise_error(
         EventMachine::MQTTSN::ProtocolException,
         "Invalid packet type identifier: 255"
       )
@@ -172,11 +172,11 @@ describe EventMachine::MQTTSN::Packet::Connect do
 
   describe "when parsing a Connect packet an unsupport protocol ID" do
     it "should throw an exception" do
-      lambda {
+      expect {
         packet = EventMachine::MQTTSN::Packet.parse(
           "\016\004\014\005\000\017myclient"
         )
-      }.should raise_error(
+      }.to raise_error(
         EventMachine::MQTTSN::ProtocolException,
         "Unsupported protocol ID number: 5"
       )
@@ -187,13 +187,13 @@ end
 describe EventMachine::MQTTSN::Packet::Connack do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Connack.new
-    packet.type_id.should == 0x05
+    expect(packet.type_id).to eq(0x05)
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a sucessful connection acknowledgement packet" do
       packet = EventMachine::MQTTSN::Packet::Connack.new( :return_code => 0x00 )
-      packet.to_s.should == "\x03\x05\x00"
+      expect(packet.to_s).to eq("\x03\x05\x00")
     end
   end
 
@@ -203,15 +203,15 @@ describe EventMachine::MQTTSN::Packet::Connack do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Connack)
     end
 
     it "should set the return code of the packet correctly" do
-      @packet.return_code.should == 0x00
+      expect(@packet.return_code).to eq(0x00)
     end
 
     it "should set the return message of the packet correctly" do
-      @packet.return_msg.should match(/accepted/i)
+      expect(@packet.return_msg).to match(/accepted/i)
     end
   end
 
@@ -221,15 +221,15 @@ describe EventMachine::MQTTSN::Packet::Connack do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Connack)
     end
 
     it "should set the return code of the packet correctly" do
-      @packet.return_code.should == 0x01
+      expect(@packet.return_code).to eq(0x01)
     end
 
     it "should set the return message of the packet correctly" do
-      @packet.return_msg.should match(/rejected: congestion/i)
+      expect(@packet.return_msg).to match(/rejected: congestion/i)
     end
   end
 
@@ -239,15 +239,15 @@ describe EventMachine::MQTTSN::Packet::Connack do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Connack)
     end
 
     it "should set the return code of the packet correctly" do
-      @packet.return_code.should == 0x02
+      expect(@packet.return_code).to eq(0x02)
     end
 
     it "should set the return message of the packet correctly" do
-      @packet.return_msg.should match(/rejected: invalid topic ID/i)
+      expect(@packet.return_msg).to match(/rejected: invalid topic ID/i)
     end
   end
 
@@ -257,15 +257,15 @@ describe EventMachine::MQTTSN::Packet::Connack do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Connack)
     end
 
     it "should set the return code of the packet correctly" do
-      @packet.return_code.should == 0x03
+      expect(@packet.return_code).to eq(0x03)
     end
 
     it "should set the return message of the packet correctly" do
-      @packet.return_msg.should match(/not supported/i)
+      expect(@packet.return_msg).to match(/not supported/i)
     end
   end
 
@@ -275,15 +275,15 @@ describe EventMachine::MQTTSN::Packet::Connack do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Connack)
     end
 
     it "should set the return code of the packet correctly" do
-      @packet.return_code.should == 0x10
+      expect(@packet.return_code).to eq(0x10)
     end
 
     it "should set the return message of the packet correctly" do
-      @packet.return_msg.should match(/rejected/i)
+      expect(@packet.return_msg).to match(/rejected/i)
     end
   end
 end
@@ -292,7 +292,7 @@ end
 describe EventMachine::MQTTSN::Packet::Register do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Register.new
-    packet.type_id.should == 0x0A
+    expect(packet.type_id).to eq(0x0A)
   end
 
   describe "when serialising a packet" do
@@ -302,7 +302,7 @@ describe EventMachine::MQTTSN::Packet::Register do
         :message_id => 0x01,
         :topic_name => 'test'
       )
-      packet.to_s.should == "\x0A\x0A\x00\x01\x00\x01test"
+      expect(packet.to_s).to eq("\x0A\x0A\x00\x01\x00\x01test")
     end
   end
 
@@ -312,23 +312,23 @@ describe EventMachine::MQTTSN::Packet::Register do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Register
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Register)
     end
 
     it "should set the topic id type of the packet correctly" do
-      @packet.topic_id_type.should == :normal
+      expect(@packet.topic_id_type).to eq(:normal)
     end
 
     it "should set the topic id of the packet correctly" do
-      @packet.topic_id.should == 0x01
+      expect(@packet.topic_id).to eq(0x01)
     end
 
     it "should set the message id of the packet correctly" do
-      @packet.message_id.should == 0x01
+      expect(@packet.message_id).to eq(0x01)
     end
 
     it "should set the topic name of the packet correctly" do
-      @packet.topic_name.should == 'test'
+      expect(@packet.topic_name).to eq('test')
     end
   end
 end
@@ -337,7 +337,7 @@ end
 describe EventMachine::MQTTSN::Packet::Regack do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Regack.new
-    packet.type_id.should == 0x0B
+    expect(packet.type_id).to eq(0x0B)
   end
 
   describe "when serialising a packet" do
@@ -347,7 +347,7 @@ describe EventMachine::MQTTSN::Packet::Regack do
         :message_id => 0x02,
         :return_code => 0x03
       )
-      packet.to_s.should == "\x07\x0B\x00\x01\x00\x02\x03"
+      expect(packet.to_s).to eq("\x07\x0B\x00\x01\x00\x02\x03")
     end
   end
 
@@ -357,23 +357,23 @@ describe EventMachine::MQTTSN::Packet::Regack do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Regack
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Regack)
     end
 
     it "should set the topic id type of the packet correctly" do
-      @packet.topic_id_type.should == :normal
+      expect(@packet.topic_id_type).to eq(:normal)
     end
 
     it "should set the topic id of the packet correctly" do
-      @packet.topic_id.should == 0x01
+      expect(@packet.topic_id).to eq(0x01)
     end
 
     it "should set the message id of the packet correctly" do
-      @packet.message_id.should == 0x02
+      expect(@packet.message_id).to eq(0x02)
     end
 
     it "should set the topic name of the packet correctly" do
-      @packet.return_code.should == 0x03
+      expect(@packet.return_code).to eq(0x03)
     end
   end
 end
@@ -382,7 +382,7 @@ end
 describe EventMachine::MQTTSN::Packet::Publish do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Publish.new
-    packet.type_id.should == 0x0C
+    expect(packet.type_id).to eq(0x0C)
   end
 
   describe "when serialising a packet with a normal topic id type" do
@@ -392,7 +392,7 @@ describe EventMachine::MQTTSN::Packet::Publish do
         :topic_id_type => :normal,
         :data => "Hello World"
       )
-      packet.to_s.should == "\x12\x0C\x00\x00\x01\x00\x00Hello World"
+      expect(packet.to_s).to eq("\x12\x0C\x00\x00\x01\x00\x00Hello World")
     end
   end
 
@@ -403,7 +403,7 @@ describe EventMachine::MQTTSN::Packet::Publish do
         :topic_id_type => :short,
         :data => "Hello World"
       )
-      packet.to_s.should == "\x12\x0C\x02tt\x00\x00Hello World"
+      expect(packet.to_s).to eq("\x12\x0C\x02tt\x00\x00Hello World")
     end
   end
 
@@ -415,35 +415,35 @@ describe EventMachine::MQTTSN::Packet::Publish do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Publish
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Publish)
     end
 
     it "should set the QOS of the packet correctly" do
-      @packet.qos.should === 0
+      expect(@packet.qos).to be === 0
     end
 
     it "should set the QOS of the packet correctly" do
-      @packet.duplicate.should === false
+      expect(@packet.duplicate).to be === false
     end
 
     it "should set the retain flag of the packet correctly" do
-      @packet.retain.should === false
+      expect(@packet.retain).to be === false
     end
 
     it "should set the topic id of the packet correctly" do
-      @packet.topic_id_type.should === :normal
+      expect(@packet.topic_id_type).to be === :normal
     end
 
     it "should set the topic id of the packet correctly" do
-      @packet.topic_id.should === 0x01
+      expect(@packet.topic_id).to be === 0x01
     end
 
     it "should set the message id of the packet correctly" do
-      @packet.message_id.should === 0x0000
+      expect(@packet.message_id).to be === 0x0000
     end
 
     it "should set the topic name of the packet correctly" do
-      @packet.data.should == "Hello World"
+      expect(@packet.data).to eq("Hello World")
     end
   end
 
@@ -455,35 +455,35 @@ describe EventMachine::MQTTSN::Packet::Publish do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Publish
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Publish)
     end
 
     it "should set the QOS of the packet correctly" do
-      @packet.qos.should === 0
+      expect(@packet.qos).to be === 0
     end
 
     it "should set the QOS of the packet correctly" do
-      @packet.duplicate.should === false
+      expect(@packet.duplicate).to be === false
     end
 
     it "should set the retain flag of the packet correctly" do
-      @packet.retain.should === false
+      expect(@packet.retain).to be === false
     end
 
     it "should set the topic id type of the packet correctly" do
-      @packet.topic_id_type.should === :short
+      expect(@packet.topic_id_type).to be === :short
     end
 
     it "should set the topic id of the packet correctly" do
-      @packet.topic_id.should === 'tt'
+      expect(@packet.topic_id).to be === 'tt'
     end
 
     it "should set the message id of the packet correctly" do
-      @packet.message_id.should === 0x0000
+      expect(@packet.message_id).to be === 0x0000
     end
 
     it "should set the topic name of the packet correctly" do
-      @packet.data.should == "Hello World"
+      expect(@packet.data).to eq("Hello World")
     end
   end
 end
@@ -492,7 +492,7 @@ end
 describe EventMachine::MQTTSN::Packet::Subscribe do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Subscribe.new
-    packet.type_id.should == 0x12
+    expect(packet.type_id).to eq(0x12)
   end
 
   describe "when serialising a packet" do
@@ -503,7 +503,7 @@ describe EventMachine::MQTTSN::Packet::Subscribe do
         :message_id => 0x02,
         :topic_name => 'test'
       )
-      packet.to_s.should == "\x09\x12\x00\x00\x02test"
+      expect(packet.to_s).to eq("\x09\x12\x00\x00\x02test")
     end
   end
 
@@ -513,23 +513,23 @@ describe EventMachine::MQTTSN::Packet::Subscribe do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Subscribe
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Subscribe)
     end
 
     it "should set the message id of the packet correctly" do
-      @packet.message_id.should == 0x03
+      expect(@packet.message_id).to eq(0x03)
     end
 
     it "should set the message id of the packet correctly" do
-      @packet.qos.should == 0
+      expect(@packet.qos).to eq(0)
     end
 
     it "should set the message id of the packet correctly" do
-      @packet.duplicate.should == false
+      expect(@packet.duplicate).to eq(false)
     end
 
     it "should set the topic name of the packet correctly" do
-      @packet.topic_name.should == 'test'
+      expect(@packet.topic_name).to eq('test')
     end
   end
 end
@@ -538,7 +538,7 @@ end
 describe EventMachine::MQTTSN::Packet::Suback do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Suback.new
-    packet.type_id.should == 0x13
+    expect(packet.type_id).to eq(0x13)
   end
 
   describe "when serialising a packet" do
@@ -549,7 +549,7 @@ describe EventMachine::MQTTSN::Packet::Suback do
         :message_id => 0x02,
         :return_code => 0x03
       )
-      packet.to_s.should == "\x08\x13\x00\x00\x01\x00\x02\x03"
+      expect(packet.to_s).to eq("\x08\x13\x00\x00\x01\x00\x02\x03")
     end
   end
 
@@ -559,27 +559,27 @@ describe EventMachine::MQTTSN::Packet::Suback do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Suback
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Suback)
     end
 
     it "should set the topic id of the packet correctly" do
-      @packet.qos.should == 0
+      expect(@packet.qos).to eq(0)
     end
 
     it "should set the topic id type of the packet correctly" do
-      @packet.topic_id_type.should == :normal
+      expect(@packet.topic_id_type).to eq(:normal)
     end
 
     it "should set the topic id of the packet correctly" do
-      @packet.topic_id.should == 0x01
+      expect(@packet.topic_id).to eq(0x01)
     end
 
     it "should set the message id of the packet correctly" do
-      @packet.message_id.should == 0x02
+      expect(@packet.message_id).to eq(0x02)
     end
 
     it "should set the topic name of the packet correctly" do
-      @packet.return_code.should == 0x03
+      expect(@packet.return_code).to eq(0x03)
     end
   end
 end
@@ -588,13 +588,13 @@ end
 describe EventMachine::MQTTSN::Packet::Pingreq do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Pingreq.new
-    packet.type_id.should == 0x16
+    expect(packet.type_id).to eq(0x16)
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a pingreq packet" do
       packet = EventMachine::MQTTSN::Packet::Pingreq.new
-      packet.to_s.should == "\x02\x16"
+      expect(packet.to_s).to eq("\x02\x16")
     end
   end
 
@@ -604,7 +604,7 @@ describe EventMachine::MQTTSN::Packet::Pingreq do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Pingreq
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Pingreq)
     end
   end
 end
@@ -613,13 +613,13 @@ end
 describe EventMachine::MQTTSN::Packet::Pingresp do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Pingresp.new
-    packet.type_id.should == 0x17
+    expect(packet.type_id).to eq(0x17)
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a pingresp packet" do
       packet = EventMachine::MQTTSN::Packet::Pingresp.new
-      packet.to_s.should == "\x02\x17"
+      expect(packet.to_s).to eq("\x02\x17")
     end
   end
 
@@ -629,7 +629,7 @@ describe EventMachine::MQTTSN::Packet::Pingresp do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Pingresp
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Pingresp)
     end
   end
 end
@@ -638,13 +638,13 @@ end
 describe EventMachine::MQTTSN::Packet::Disconnect do
   it "should have the right type id" do
     packet = EventMachine::MQTTSN::Packet::Disconnect.new
-    packet.type_id.should == 0x18
+    expect(packet.type_id).to eq(0x18)
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a disconnect packet" do
       packet = EventMachine::MQTTSN::Packet::Disconnect.new
-      packet.to_s.should == "\x02\x18"
+      expect(packet.to_s).to eq("\x02\x18")
     end
   end
 
@@ -654,7 +654,7 @@ describe EventMachine::MQTTSN::Packet::Disconnect do
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTSN::Packet::Disconnect
+      expect(@packet.class).to eq(EventMachine::MQTTSN::Packet::Disconnect)
     end
   end
 end
