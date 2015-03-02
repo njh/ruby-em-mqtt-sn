@@ -4,7 +4,7 @@ ruby-em-mqtt-sn
 This gem adds MQTT-SN (MQTT For Sensor Networks) protocol support to EventMachine,
 an event-processing library for Ruby.
 
-It also includes a MQTT-SN gateway, to connect MQTT-SN clients to a standard [MQTT] broker.
+It also includes a MQTT-SN gateway, to connect MQTT-SN clients to a standard [MQTT] server.
 
     Usage: em-mqtt-sn-gateway [options]
 
@@ -12,8 +12,8 @@ It also includes a MQTT-SN gateway, to connect MQTT-SN clients to a standard [MQ
       -D, --debug                  turn on debug logging
       -a, --address [HOST]         bind to HOST address (default: 0.0.0.0)
       -p, --port [PORT]            UDP port number to run on (default: 1883)
-      -A, --broker-address [HOST]  MQTT broker address to connect to (default: 127.0.0.1)
-      -P, --broker-port [PORT]     MQTT broker port to connect to (default: 1883)
+      -A, --server-address [HOST]  MQTT server address to connect to (default: 127.0.0.1)
+      -P, --server-port [PORT]     MQTT server port to connect to (default: 1883)
       -h, --help                   show this message
           --version                show version
 
@@ -23,8 +23,8 @@ Example
 
     $ sudo gem install em-mqtt-sn
     $ em-mqtt-sn-gateway -A test.mosquitto.org
-    I, [2013-04-20T12:08:56.850572 #29588]  INFO -- : Starting MQTT-S gateway on UDP 0.0.0.0:1883
-    I, [2013-04-20T12:08:56.850646 #29588]  INFO -- : Broker address test.mosquitto.org:1883
+    I, [2013-04-20T12:08:56.850572 #29588]  INFO -- : Starting MQTT-SN gateway on UDP 0.0.0.0:1883
+    I, [2013-04-20T12:08:56.850646 #29588]  INFO -- : Server address test.mosquitto.org:1883
     I, [2013-04-20T12:09:00.577446 #29588]  INFO -- : mqtt-sn-tools-29710 is now connected
     I, [2013-04-20T12:09:00.578032 #29588]  INFO -- : mqtt-sn-tools-29710 subscribing to 'test'
     I, [2013-04-20T12:09:00.601937 #29588]  INFO -- : mqtt-sn-tools-29710 recieved publish to 'test'

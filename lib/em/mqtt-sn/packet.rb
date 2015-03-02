@@ -1,6 +1,6 @@
-module EventMachine::MQTTS
+module EventMachine::MQTTSN
 
-  # Class representing a MQTTS Packet
+  # Class representing a MQTTSN Packet
   # Performs binary encoding and decoding of headers
   class Packet
     attr_accessor :duplicate     # Duplicate delivery flag
@@ -314,35 +314,35 @@ module EventMachine::MQTTS
   end
 
 
-  # An enumeration of the MQTT-S packet types
+  # An enumeration of the MQTT-SN packet types
   PACKET_TYPES = {
-#       0x00 => EventMachine::MQTTS::Packet::Advertise,
-#       0x01 => EventMachine::MQTTS::Packet::Searchgw,
-#       0x02 => EventMachine::MQTTS::Packet::Gwinfo,
-      0x04 => EventMachine::MQTTS::Packet::Connect,
-      0x05 => EventMachine::MQTTS::Packet::Connack,
-#       0x06 => EventMachine::MQTTS::Packet::Willtopicreq,
-#       0x07 => EventMachine::MQTTS::Packet::Willtopic,
-#       0x08 => EventMachine::MQTTS::Packet::Willmsgreq,
-#       0x09 => EventMachine::MQTTS::Packet::Willmsg,
-      0x0a => EventMachine::MQTTS::Packet::Register,
-      0x0b => EventMachine::MQTTS::Packet::Regack,
-      0x0c => EventMachine::MQTTS::Packet::Publish,
-#       0x0d => EventMachine::MQTTS::Packet::Puback,
-#       0x0e => EventMachine::MQTTS::Packet::Pubcomp,
-#       0x0f => EventMachine::MQTTS::Packet::Pubrec,
-#       0x10 => EventMachine::MQTTS::Packet::Pubrel,
-      0x12 => EventMachine::MQTTS::Packet::Subscribe,
-      0x13 => EventMachine::MQTTS::Packet::Suback,
-#       0x14 => EventMachine::MQTTS::Packet::Unsubscribe,
-#       0x15 => EventMachine::MQTTS::Packet::Unsuback,
-      0x16 => EventMachine::MQTTS::Packet::Pingreq,
-      0x17 => EventMachine::MQTTS::Packet::Pingresp,
-      0x18 => EventMachine::MQTTS::Packet::Disconnect,
-#       0x1a => EventMachine::MQTTS::Packet::Willtopicupd,
-#       0x1b => EventMachine::MQTTS::Packet::Willtopicresp,
-#       0x1c => EventMachine::MQTTS::Packet::Willmsgupd,
-#       0x1d => EventMachine::MQTTS::Packet::Willmsgresp,
+#       0x00 => EventMachine::MQTTSN::Packet::Advertise,
+#       0x01 => EventMachine::MQTTSN::Packet::Searchgw,
+#       0x02 => EventMachine::MQTTSN::Packet::Gwinfo,
+      0x04 => EventMachine::MQTTSN::Packet::Connect,
+      0x05 => EventMachine::MQTTSN::Packet::Connack,
+#       0x06 => EventMachine::MQTTSN::Packet::Willtopicreq,
+#       0x07 => EventMachine::MQTTSN::Packet::Willtopic,
+#       0x08 => EventMachine::MQTTSN::Packet::Willmsgreq,
+#       0x09 => EventMachine::MQTTSN::Packet::Willmsg,
+      0x0a => EventMachine::MQTTSN::Packet::Register,
+      0x0b => EventMachine::MQTTSN::Packet::Regack,
+      0x0c => EventMachine::MQTTSN::Packet::Publish,
+#       0x0d => EventMachine::MQTTSN::Packet::Puback,
+#       0x0e => EventMachine::MQTTSN::Packet::Pubcomp,
+#       0x0f => EventMachine::MQTTSN::Packet::Pubrec,
+#       0x10 => EventMachine::MQTTSN::Packet::Pubrel,
+      0x12 => EventMachine::MQTTSN::Packet::Subscribe,
+      0x13 => EventMachine::MQTTSN::Packet::Suback,
+#       0x14 => EventMachine::MQTTSN::Packet::Unsubscribe,
+#       0x15 => EventMachine::MQTTSN::Packet::Unsuback,
+      0x16 => EventMachine::MQTTSN::Packet::Pingreq,
+      0x17 => EventMachine::MQTTSN::Packet::Pingresp,
+      0x18 => EventMachine::MQTTSN::Packet::Disconnect,
+#       0x1a => EventMachine::MQTTSN::Packet::Willtopicupd,
+#       0x1b => EventMachine::MQTTSN::Packet::Willtopicresp,
+#       0x1c => EventMachine::MQTTSN::Packet::Willmsgupd,
+#       0x1d => EventMachine::MQTTSN::Packet::Willmsgresp,
   }
 
 end

@@ -1,13 +1,13 @@
 #
 # There is only a single instance of GatewayHandler which
-# processes UDP packets from all MQTT-S clients.
+# processes UDP packets from all MQTT-SN clients.
 #
 
-class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
+class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
   attr_reader :logger
   attr_reader :connections
-  attr_reader :broker_address
-  attr_reader :broker_port
+  attr_reader :server_address
+  attr_reader :server_port
 
   def initialize(attr)
     @connections = {}
@@ -21,7 +21,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
   # UDP packet received by gateway
   def receive_data(data)
-    packet = EventMachine::MQTTS::Packet.parse(data)
+    packet = EventMachine::MQTTSN::Packet.parse(data)
     unless packet.nil?
       process_packet(get_peername, packet)
     end
@@ -29,36 +29,36 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
 
   # Incoming packet received from client
   def process_packet(peername, packet)
-    logger.debug("Received MQTT-S: #{packet.class}")
+    logger.debug("Received MQTT-SN: #{packet.class}")
 
-    if packet.class == EventMachine::MQTTS::Packet::Connect
+    if packet.class == EventMachine::MQTTSN::Packet::Connect
       connect(peername, packet)
     else
       connection = @connections[peername]
       unless connection.nil? or !connection.connected?
         case packet
-          when EventMachine::MQTTS::Packet::Register
+          when EventMachine::MQTTSN::Packet::Register
             register(connection, packet)
-          when EventMachine::MQTTS::Packet::Publish
+          when EventMachine::MQTTSN::Packet::Publish
             publish(connection, packet)
-          when EventMachine::MQTTS::Packet::Subscribe
+          when EventMachine::MQTTSN::Packet::Subscribe
             subscribe(connection, packet)
-          when EventMachine::MQTTS::Packet::Pingreq
+          when EventMachine::MQTTSN::Packet::Pingreq
             connection.send_packet MQTT::Packet::Pingreq.new
-          when EventMachine::MQTTS::Packet::Pingresp
+          when EventMachine::MQTTSN::Packet::Pingresp
             connection.send_packet MQTT::Packet::Pingresp.new
-          when EventMachine::MQTTS::Packet::Disconnect
+          when EventMachine::MQTTSN::Packet::Disconnect
             disconnect(connection)
           else
-            logger.warn("Unable to handle MQTT-S packet of type: #{packet.class}")
+            logger.warn("Unable to handle MQTT-SN packet of type: #{packet.class}")
         end
       else
-        logger.warn("Received MQTT-S packet of type: #{packet.class} while not connected")
+        logger.warn("Received MQTT-SN packet of type: #{packet.class} while not connected")
       end
     end
   end
 
-  # CONNECT received from client - establish connection to broker
+  # CONNECT received from client - establish connection to server
   def connect(peername, packet)
     # If connection already exists, disconnect first
     if @connections.has_key?(peername)
@@ -66,18 +66,18 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
       @connections[peername].disconnect
     end
 
-    # Create a TCP connection to the broker
+    # Create a TCP connection to the server
     client_port, client_address = Socket.unpack_sockaddr_in(peername)
     connection = EventMachine::connect(
-      broker_address, broker_port,
-      EventMachine::MQTTS::BrokerConnection,
+      server_address, server_port,
+      EventMachine::MQTTSN::ServerConnection,
       self, client_address, client_port
     )
 
     # Store the client ID
     connection.client_id = packet.client_id
 
-    # Send a MQTT connect packet to the broker
+    # Send a MQTT connect packet to the server
     connection.send_packet MQTT::Packet::Connect.new(
       :client_id => packet.client_id,
       :keep_alive => packet.keep_alive,
@@ -88,13 +88,13 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
     @connections[peername] = connection
   end
 
-  # Handle a MQTT packet coming back from the broker
-  def relay_from_broker(connection, packet)
+  # Handle a MQTT packet coming back from the server
+  def relay_from_server(connection, packet)
     logger.debug("Received MQTT: #{packet.inspect}")
     case packet
       when MQTT::Packet::Connack
         # FIXME: re-map the return code
-        mqtts_packet = EventMachine::MQTTS::Packet::Connack.new(
+        mqttsn_packet = EventMachine::MQTTSN::Packet::Connack.new(
           :return_code => packet.return_code
         )
         if packet.return_code == 0
@@ -108,7 +108,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
         if request
           logger.debug("#{connection.client_id} now subscribed to '#{request.topic_name}'")
           topic_id_type, topic_id = connection.get_topic_id(request.topic_name)
-          mqtts_packet = EventMachine::MQTTS::Packet::Suback.new(
+          mqttsn_packet = EventMachine::MQTTSN::Packet::Suback.new(
             :topic_id_type => topic_id_type,
             :topic_id => topic_id,
             :qos => packet.granted_qos.first,
@@ -116,13 +116,13 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
             :return_code => 0x00
           )
         else
-          logger.warn("Received Suback from broker for something we didn't request: #{packet.inspect}")
+          logger.warn("Received Suback from server for something we didn't request: #{packet.inspect}")
         end
       when MQTT::Packet::Publish
         logger.info("#{connection.client_id} recieved publish to '#{packet.topic}'")
         # FIXME: send register if this is a new topic
         topic_id_type, topic_id = connection.get_topic_id(packet.topic)
-        mqtts_packet = EventMachine::MQTTS::Packet::Publish.new(
+        mqttsn_packet = EventMachine::MQTTSN::Packet::Publish.new(
           :duplicate => packet.duplicate,
           :qos => packet.qos,
           :retain => packet.retain,
@@ -132,21 +132,21 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
           :data => packet.payload
         )
       when MQTT::Packet::Pingreq
-        mqtts_packet = EventMachine::MQTTS::Packet::Pingreq.new
+        mqttsn_packet = EventMachine::MQTTSN::Packet::Pingreq.new
       when MQTT::Packet::Pingresp
-        mqtts_packet = EventMachine::MQTTS::Packet::Pingresp.new
+        mqttsn_packet = EventMachine::MQTTSN::Packet::Pingresp.new
       else
         logger.warn("Unable to handle MQTT packet of type: #{packet.class}")
     end
 
-    unless mqtts_packet.nil?
-      send_datagram(mqtts_packet.to_s, connection.client_address, connection.client_port)
+    unless mqttsn_packet.nil?
+      send_datagram(mqttsn_packet.to_s, connection.client_address, connection.client_port)
     end
   end
 
   # REGISTER received from client
   def register(connection, packet)
-    regack = EventMachine::MQTTS::Packet::Regack.new(
+    regack = EventMachine::MQTTSN::Packet::Regack.new(
       :topic_id_type => :normal,
       :message_id => packet.message_id
     )
@@ -161,7 +161,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
     send_data(regack.to_s)
   end
 
-  # PUBLISH received from client - pass it on to the broker
+  # PUBLISH received from client - pass it on to the server
   def publish(connection, packet)
     if packet.topic_id_type == :short
       topic_name = packet.topic_id
@@ -183,7 +183,7 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
     end
   end
 
-  # SUBSCRIBE received from client - pass it on to the broker
+  # SUBSCRIBE received from client - pass it on to the server
   def subscribe(connection, packet)
     logger.info("#{connection.client_id} subscribing to '#{packet.topic_name}'")
     mqtt_packet = MQTT::Packet::Subscribe.new(
@@ -196,12 +196,12 @@ class EventMachine::MQTTS::GatewayHandler < EventMachine::Connection
     connection.send_packet(mqtt_packet)
   end
 
-  # Disconnect client from broker
+  # Disconnect client from server
   def disconnect(connection)
     if connection.connected?
       logger.info("Disconnected: #{connection.client_id}")
-      mqtts_packet = EventMachine::MQTTS::Packet::Disconnect.new
-      send_datagram(mqtts_packet.to_s, connection.client_address, connection.client_port)
+      mqttsn_packet = EventMachine::MQTTSN::Packet::Disconnect.new
+      send_datagram(mqttsn_packet.to_s, connection.client_address, connection.client_port)
       connection.disconnect
     end
   end

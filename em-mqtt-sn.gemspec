@@ -1,21 +1,21 @@
 #!/usr/bin/env ruby -rubygems
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "em/mqtts/version"
+require "em/mqtt-sn/version"
 
 Gem::Specification.new do |gem|
-  gem.name        = 'em-mqtts'
-  gem.version     = EventMachine::MQTTS::VERSION
+  gem.name        = 'em-mqtt-sn'
+  gem.version     = EventMachine::MQTTSN::VERSION
   gem.author      = 'Nicholas J Humfrey'
   gem.email       = 'njh@aelius.com'
-  gem.homepage    = 'http://github.com/njh/ruby-em-mqtts'
-  gem.summary     = 'MQTT-S for EventMachine'
-  gem.description = 'This gem adds MQTT-S protocol and gateway support to EventMachine.'
+  gem.homepage    = 'http://github.com/njh/ruby-em-mqtt-sn'
+  gem.summary     = 'MQTT-SN for EventMachine'
+  gem.description = 'This gem adds MQTT-SN protocol and gateway support to EventMachine.'
   gem.license     = 'Ruby' if gem.respond_to?(:license=)
 
-  gem.files         = %w(README.md COPYING GPL NEWS.md) + Dir.glob('lib/**/*.rb')
+  gem.files         = %w(README.md LICENSE.md NEWS.md) + Dir.glob('lib/**/*.rb')
   gem.test_files    = Dir.glob('spec/*_spec.rb')
-  gem.executables   = %w(em-mqtts-gateway)
+  gem.executables   = %w(em-mqtt-sn-gateway)
   gem.require_paths = %w(lib)
 
   gem.add_runtime_dependency     'eventmachine'

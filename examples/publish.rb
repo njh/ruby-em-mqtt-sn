@@ -3,9 +3,9 @@
 $:.unshift File.dirname(__FILE__)+'/../lib'
 
 require 'rubygems'
-require 'em-mqtts'
+require 'em-mqtt-sn'
 
-include EventMachine::MQTTS
+include EventMachine::MQTTSN
 
 EventMachine.run do
   c = ClientConnection.connect('localhost')

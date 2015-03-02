@@ -2,32 +2,32 @@ $:.unshift(File.dirname(__FILE__))
 
 require 'spec_helper'
 
-describe EventMachine::MQTTS::Packet do
+describe EventMachine::MQTTSN::Packet do
 
   describe "when creating a new packet" do
     it "should allow you to set the packet dup flag as a hash parameter" do
-      packet = EventMachine::MQTTS::Packet.new( :duplicate => true )
-      packet.duplicate.should be_true
+      packet = EventMachine::MQTTSN::Packet.new( :duplicate => true )
+      expect(packet.duplicate).to be_truthy
     end
 
     it "should allow you to set the packet QOS level as a hash parameter" do
-      packet = EventMachine::MQTTS::Packet.new( :qos => 2 )
+      packet = EventMachine::MQTTSN::Packet.new( :qos => 2 )
       packet.qos.should == 2
     end
 
     it "should allow you to set the packet retain flag as a hash parameter" do
-      packet = EventMachine::MQTTS::Packet.new( :retain => true )
-      packet.retain.should be_true
+      packet = EventMachine::MQTTSN::Packet.new( :retain => true )
+      packet.retain.should be_truthy
     end
   end
 
   describe "getting the type id on a un-subclassed packet" do
     it "should throw an exception" do
       lambda {
-        EventMachine::MQTTS::Packet.new.type_id
+        EventMachine::MQTTSN::Packet.new.type_id
       }.should raise_error(
         RuntimeError,
-        "Invalid packet type: EventMachine::MQTTS::Packet"
+        "Invalid packet type: EventMachine::MQTTSN::Packet"
       )
     end
   end
@@ -35,9 +35,9 @@ describe EventMachine::MQTTS::Packet do
   describe "Parsing a packet that does not match the packet length" do
     it "should throw an exception" do
       lambda {
-        packet = EventMachine::MQTTS::Packet.parse("\x02\x1834567")
+        packet = EventMachine::MQTTSN::Packet.parse("\x02\x1834567")
       }.should raise_error(
-        EventMachine::MQTTS::ProtocolException,
+        EventMachine::MQTTSN::ProtocolException,
         "Length of packet is not the same as the length header"
       )
     end
@@ -46,22 +46,22 @@ describe EventMachine::MQTTS::Packet do
 end
 
 
-describe EventMachine::MQTTS::Packet::Connect do
+describe EventMachine::MQTTSN::Packet::Connect do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Connect.new
+    packet = EventMachine::MQTTSN::Packet::Connect.new
     packet.type_id.should == 0x04
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a packet with no flags" do
-      packet = EventMachine::MQTTS::Packet::Connect.new(
+      packet = EventMachine::MQTTSN::Packet::Connect.new(
         :client_id => 'mqtts-client-pub'
       )
       packet.to_s.should == "\026\004\004\001\000\017mqtts-client-pub"
     end
 
     it "should output the correct bytes for a packet with clean session turned off" do
-      packet = EventMachine::MQTTS::Packet::Connect.new(
+      packet = EventMachine::MQTTSN::Packet::Connect.new(
         :client_id => 'myclient',
         :clean_session => false
       )
@@ -70,14 +70,14 @@ describe EventMachine::MQTTS::Packet::Connect do
 
     it "should throw an exception when there is no client identifier" do
       lambda {
-        EventMachine::MQTTS::Packet::Connect.new.to_s
+        EventMachine::MQTTSN::Packet::Connect.new.to_s
       }.should raise_error(
         'Invalid client identifier when serialising packet'
       )
     end
 
     it "should output the correct bytes for a packet with a will request" do
-      packet = EventMachine::MQTTS::Packet::Connect.new(
+      packet = EventMachine::MQTTSN::Packet::Connect.new(
         :client_id => 'myclient',
         :request_will => true,
         :clean_session => true
@@ -86,7 +86,7 @@ describe EventMachine::MQTTS::Packet::Connect do
     end
 
     it "should output the correct bytes for with a custom keep alive" do
-      packet = EventMachine::MQTTS::Packet::Connect.new(
+      packet = EventMachine::MQTTSN::Packet::Connect.new(
         :client_id => 'myclient',
         :request_will => true,
         :clean_session => true,
@@ -98,21 +98,21 @@ describe EventMachine::MQTTS::Packet::Connect do
 
   describe "when parsing a simple Connect packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse(
+      @packet = EventMachine::MQTTSN::Packet.parse(
         "\026\004\004\001\000\000mqtts-client-pub"
       )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Connect
+      @packet.class.should == EventMachine::MQTTSN::Packet::Connect
     end
 
     it "should not have the request will flag set" do
-      @packet.request_will.should be_false
+      @packet.request_will.should be_falsy
     end
 
     it "shoul have the clean session flag set" do
-      @packet.clean_session.should be_true
+      @packet.clean_session.should be_truthy
     end
 
     it "should set the Keep Alive timer of the packet correctly" do
@@ -126,45 +126,45 @@ describe EventMachine::MQTTS::Packet::Connect do
 
   describe "when parsing a Connect packet with the clean session flag set" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse(
+      @packet = EventMachine::MQTTSN::Packet.parse(
         "\016\004\004\001\000\017myclient"
       )
     end
 
     it "should set the clean session flag" do
-      @packet.clean_session.should be_true
+      @packet.clean_session.should be_truthy
     end
   end
 
   describe "when parsing a Connect packet with the will request flag set" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse(
+      @packet = EventMachine::MQTTSN::Packet.parse(
         "\016\004\014\001\000\017myclient"
       )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Connect
+      @packet.class.should == EventMachine::MQTTSN::Packet::Connect
     end
     it "should set the Client Identifier of the packet correctly" do
       @packet.client_id.should == 'myclient'
     end
 
     it "should set the clean session flag should be set" do
-      @packet.clean_session.should be_true
+      @packet.clean_session.should be_truthy
     end
 
     it "should set the Will retain flag should be false" do
-      @packet.request_will.should be_true
+      @packet.request_will.should be_truthy
     end
   end
 
   context "that has an invalid type identifier" do
     it "should throw an exception" do
       lambda {
-        EventMachine::MQTTS::Packet.parse( "\x02\xFF" )
+        EventMachine::MQTTSN::Packet.parse( "\x02\xFF" )
       }.should raise_error(
-        EventMachine::MQTTS::ProtocolException,
+        EventMachine::MQTTSN::ProtocolException,
         "Invalid packet type identifier: 255"
       )
     end
@@ -173,37 +173,37 @@ describe EventMachine::MQTTS::Packet::Connect do
   describe "when parsing a Connect packet an unsupport protocol ID" do
     it "should throw an exception" do
       lambda {
-        packet = EventMachine::MQTTS::Packet.parse(
+        packet = EventMachine::MQTTSN::Packet.parse(
           "\016\004\014\005\000\017myclient"
         )
       }.should raise_error(
-        EventMachine::MQTTS::ProtocolException,
+        EventMachine::MQTTSN::ProtocolException,
         "Unsupported protocol ID number: 5"
       )
     end
   end
 end
 
-describe EventMachine::MQTTS::Packet::Connack do
+describe EventMachine::MQTTSN::Packet::Connack do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Connack.new
+    packet = EventMachine::MQTTSN::Packet::Connack.new
     packet.type_id.should == 0x05
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a sucessful connection acknowledgement packet" do
-      packet = EventMachine::MQTTS::Packet::Connack.new( :return_code => 0x00 )
+      packet = EventMachine::MQTTSN::Packet::Connack.new( :return_code => 0x00 )
       packet.to_s.should == "\x03\x05\x00"
     end
   end
 
   describe "when parsing a successful Connection Accepted packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x00" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x03\x05\x00" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
     end
 
     it "should set the return code of the packet correctly" do
@@ -217,11 +217,11 @@ describe EventMachine::MQTTS::Packet::Connack do
 
   describe "when parsing a congestion packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x01" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x03\x05\x01" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
     end
 
     it "should set the return code of the packet correctly" do
@@ -235,11 +235,11 @@ describe EventMachine::MQTTS::Packet::Connack do
 
   describe "when parsing a invalid topic ID packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x02" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x03\x05\x02" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
     end
 
     it "should set the return code of the packet correctly" do
@@ -253,11 +253,11 @@ describe EventMachine::MQTTS::Packet::Connack do
 
   describe "when parsing a 'not supported' packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x03" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x03\x05\x03" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
     end
 
     it "should set the return code of the packet correctly" do
@@ -271,11 +271,11 @@ describe EventMachine::MQTTS::Packet::Connack do
 
   describe "when parsing an unknown connection refused packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x03\x05\x10" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x03\x05\x10" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Connack
+      @packet.class.should == EventMachine::MQTTSN::Packet::Connack
     end
 
     it "should set the return code of the packet correctly" do
@@ -289,15 +289,15 @@ describe EventMachine::MQTTS::Packet::Connack do
 end
 
 
-describe EventMachine::MQTTS::Packet::Register do
+describe EventMachine::MQTTSN::Packet::Register do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Register.new
+    packet = EventMachine::MQTTSN::Packet::Register.new
     packet.type_id.should == 0x0A
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a register packet" do
-      packet = EventMachine::MQTTS::Packet::Register.new(
+      packet = EventMachine::MQTTSN::Packet::Register.new(
         :topic_id => 0x01,
         :message_id => 0x01,
         :topic_name => 'test'
@@ -308,11 +308,11 @@ describe EventMachine::MQTTS::Packet::Register do
 
   describe "when parsing a Register packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x0A\x0A\x00\x01\x00\x01test" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x0A\x0A\x00\x01\x00\x01test" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Register
+      @packet.class.should == EventMachine::MQTTSN::Packet::Register
     end
 
     it "should set the topic id type of the packet correctly" do
@@ -334,15 +334,15 @@ describe EventMachine::MQTTS::Packet::Register do
 end
 
 
-describe EventMachine::MQTTS::Packet::Regack do
+describe EventMachine::MQTTSN::Packet::Regack do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Regack.new
+    packet = EventMachine::MQTTSN::Packet::Regack.new
     packet.type_id.should == 0x0B
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a register packet" do
-      packet = EventMachine::MQTTS::Packet::Regack.new(
+      packet = EventMachine::MQTTSN::Packet::Regack.new(
         :topic_id => 0x01,
         :message_id => 0x02,
         :return_code => 0x03
@@ -353,11 +353,11 @@ describe EventMachine::MQTTS::Packet::Regack do
 
   describe "when parsing a REGACK packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x07\x0B\x00\x01\x00\x02\x03" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x07\x0B\x00\x01\x00\x02\x03" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Regack
+      @packet.class.should == EventMachine::MQTTSN::Packet::Regack
     end
 
     it "should set the topic id type of the packet correctly" do
@@ -379,15 +379,15 @@ describe EventMachine::MQTTS::Packet::Regack do
 end
 
 
-describe EventMachine::MQTTS::Packet::Publish do
+describe EventMachine::MQTTSN::Packet::Publish do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Publish.new
+    packet = EventMachine::MQTTSN::Packet::Publish.new
     packet.type_id.should == 0x0C
   end
 
   describe "when serialising a packet with a normal topic id type" do
     it "should output the correct bytes for a publish packet" do
-      packet = EventMachine::MQTTS::Packet::Publish.new(
+      packet = EventMachine::MQTTSN::Packet::Publish.new(
         :topic_id => 0x01,
         :topic_id_type => :normal,
         :data => "Hello World"
@@ -398,7 +398,7 @@ describe EventMachine::MQTTS::Packet::Publish do
 
   describe "when serialising a packet with a short topic id type" do
     it "should output the correct bytes for a publish packet" do
-      packet = EventMachine::MQTTS::Packet::Publish.new(
+      packet = EventMachine::MQTTSN::Packet::Publish.new(
         :topic_id => 'tt',
         :topic_id_type => :short,
         :data => "Hello World"
@@ -409,13 +409,13 @@ describe EventMachine::MQTTS::Packet::Publish do
 
   describe "when parsing a Publish packet with a normal topic id" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse(
+      @packet = EventMachine::MQTTSN::Packet.parse(
         "\x12\x0C\x00\x00\x01\x00\x00Hello World"
       )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Publish
+      @packet.class.should == EventMachine::MQTTSN::Packet::Publish
     end
 
     it "should set the QOS of the packet correctly" do
@@ -449,13 +449,13 @@ describe EventMachine::MQTTS::Packet::Publish do
 
   describe "when parsing a Publish packet with a short topic id" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse(
+      @packet = EventMachine::MQTTSN::Packet.parse(
         "\x12\x0C\x02tt\x00\x00Hello World"
       )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Publish
+      @packet.class.should == EventMachine::MQTTSN::Packet::Publish
     end
 
     it "should set the QOS of the packet correctly" do
@@ -489,15 +489,15 @@ describe EventMachine::MQTTS::Packet::Publish do
 end
 
 
-describe EventMachine::MQTTS::Packet::Subscribe do
+describe EventMachine::MQTTSN::Packet::Subscribe do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Subscribe.new
+    packet = EventMachine::MQTTSN::Packet::Subscribe.new
     packet.type_id.should == 0x12
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a Subscribe packet" do
-      packet = EventMachine::MQTTS::Packet::Subscribe.new(
+      packet = EventMachine::MQTTSN::Packet::Subscribe.new(
         :duplicate => false,
         :qos => 0,
         :message_id => 0x02,
@@ -509,11 +509,11 @@ describe EventMachine::MQTTS::Packet::Subscribe do
 
   describe "when parsing a Subscribe packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x09\x12\x00\x00\x03test" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x09\x12\x00\x00\x03test" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Subscribe
+      @packet.class.should == EventMachine::MQTTSN::Packet::Subscribe
     end
 
     it "should set the message id of the packet correctly" do
@@ -535,15 +535,15 @@ describe EventMachine::MQTTS::Packet::Subscribe do
 end
 
 
-describe EventMachine::MQTTS::Packet::Suback do
+describe EventMachine::MQTTSN::Packet::Suback do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Suback.new
+    packet = EventMachine::MQTTSN::Packet::Suback.new
     packet.type_id.should == 0x13
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a register packet" do
-      packet = EventMachine::MQTTS::Packet::Suback.new(
+      packet = EventMachine::MQTTSN::Packet::Suback.new(
         :qos => 0,
         :topic_id => 0x01,
         :message_id => 0x02,
@@ -555,11 +555,11 @@ describe EventMachine::MQTTS::Packet::Suback do
 
   describe "when parsing a SUBACK packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse( "\x08\x13\x00\x00\x01\x00\x02\x03" )
+      @packet = EventMachine::MQTTSN::Packet.parse( "\x08\x13\x00\x00\x01\x00\x02\x03" )
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Suback
+      @packet.class.should == EventMachine::MQTTSN::Packet::Suback
     end
 
     it "should set the topic id of the packet correctly" do
@@ -585,76 +585,76 @@ describe EventMachine::MQTTS::Packet::Suback do
 end
 
 
-describe EventMachine::MQTTS::Packet::Pingreq do
+describe EventMachine::MQTTSN::Packet::Pingreq do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Pingreq.new
+    packet = EventMachine::MQTTSN::Packet::Pingreq.new
     packet.type_id.should == 0x16
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a pingreq packet" do
-      packet = EventMachine::MQTTS::Packet::Pingreq.new
+      packet = EventMachine::MQTTSN::Packet::Pingreq.new
       packet.to_s.should == "\x02\x16"
     end
   end
 
   describe "when parsing a Pingreq packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse("\x02\x16")
+      @packet = EventMachine::MQTTSN::Packet.parse("\x02\x16")
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Pingreq
+      @packet.class.should == EventMachine::MQTTSN::Packet::Pingreq
     end
   end
 end
 
 
-describe EventMachine::MQTTS::Packet::Pingresp do
+describe EventMachine::MQTTSN::Packet::Pingresp do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Pingresp.new
+    packet = EventMachine::MQTTSN::Packet::Pingresp.new
     packet.type_id.should == 0x17
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a pingresp packet" do
-      packet = EventMachine::MQTTS::Packet::Pingresp.new
+      packet = EventMachine::MQTTSN::Packet::Pingresp.new
       packet.to_s.should == "\x02\x17"
     end
   end
 
   describe "when parsing a Pingresp packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse("\x02\x17")
+      @packet = EventMachine::MQTTSN::Packet.parse("\x02\x17")
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Pingresp
+      @packet.class.should == EventMachine::MQTTSN::Packet::Pingresp
     end
   end
 end
 
 
-describe EventMachine::MQTTS::Packet::Disconnect do
+describe EventMachine::MQTTSN::Packet::Disconnect do
   it "should have the right type id" do
-    packet = EventMachine::MQTTS::Packet::Disconnect.new
+    packet = EventMachine::MQTTSN::Packet::Disconnect.new
     packet.type_id.should == 0x18
   end
 
   describe "when serialising a packet" do
     it "should output the correct bytes for a disconnect packet" do
-      packet = EventMachine::MQTTS::Packet::Disconnect.new
+      packet = EventMachine::MQTTSN::Packet::Disconnect.new
       packet.to_s.should == "\x02\x18"
     end
   end
 
   describe "when parsing a Disconnect packet" do
     before(:each) do
-      @packet = EventMachine::MQTTS::Packet.parse("\x02\x18")
+      @packet = EventMachine::MQTTSN::Packet.parse("\x02\x18")
     end
 
     it "should correctly create the right type of packet object" do
-      @packet.class.should == EventMachine::MQTTS::Packet::Disconnect
+      @packet.class.should == EventMachine::MQTTSN::Packet::Disconnect
     end
   end
 end

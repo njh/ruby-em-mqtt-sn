@@ -1,5 +1,5 @@
 
-class EventMachine::MQTTS::BrokerConnection < EventMachine::MQTT::Connection
+class EventMachine::MQTTSN::ServerConnection < EventMachine::MQTT::Connection
   attr_accessor :gateway_handler
   attr_accessor :client_address
   attr_accessor :client_port
@@ -15,18 +15,18 @@ class EventMachine::MQTTS::BrokerConnection < EventMachine::MQTT::Connection
     @pending_requests = {}
   end
 
-  # TCP connection to broker has closed
+  # TCP connection to server has closed
   def unbind
     @gateway_handler.disconnect(self)
   end
 
-  # Incoming packet from broker has been received
+  # Incoming packet from server has been received
   def process_packet(packet)
     if packet.class == MQTT::Packet::Connack and packet.return_code == 0
       @state = :connected
     end
 
-    @gateway_handler.relay_from_broker(self, packet)
+    @gateway_handler.relay_from_server(self, packet)
   end
 
   # Get the topic ID for a topic name
@@ -68,7 +68,7 @@ class EventMachine::MQTTS::BrokerConnection < EventMachine::MQTT::Connection
     end
   end
 
-  # Politely close the connection to the MQTT broker
+  # Politely close the connection to the MQTT server
   def disconnect
     send_packet(MQTT::Packet::Disconnect.new)
     @state = :disconnected
