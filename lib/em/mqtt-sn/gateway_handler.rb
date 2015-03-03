@@ -187,10 +187,8 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
   def subscribe(connection, packet)
     logger.info("#{connection.client_id} subscribing to '#{packet.topic_name}'")
     mqtt_packet = MQTT::Packet::Subscribe.new(
-      :topics => packet.topic_name,
       :message_id => packet.message_id,
-      :duplicate => packet.duplicate,
-      :qos => packet.qos
+      :topics => packet.topic_name
     )
     connection.add_to_pending(packet)
     connection.send_packet(mqtt_packet)
