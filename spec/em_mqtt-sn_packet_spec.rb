@@ -55,9 +55,9 @@ describe EventMachine::MQTTSN::Packet::Connect do
   describe "when serialising a packet" do
     it "should output the correct bytes for a packet with no flags" do
       packet = EventMachine::MQTTSN::Packet::Connect.new(
-        :client_id => 'mqtts-client-pub'
+        :client_id => 'mqtt-sn-client-pub'
       )
-      expect(packet.to_s).to eq("\026\004\004\001\000\017mqtts-client-pub")
+      expect(packet.to_s).to eq("\x18\x04\x04\x01\x00\x0fmqtt-sn-client-pub")
     end
 
     it "should output the correct bytes for a packet with clean session turned off" do
@@ -99,7 +99,7 @@ describe EventMachine::MQTTSN::Packet::Connect do
   describe "when parsing a simple Connect packet" do
     before(:each) do
       @packet = EventMachine::MQTTSN::Packet.parse(
-        "\026\004\004\001\000\000mqtts-client-pub"
+        "\x18\x04\x04\x01\x00\x00mqtt-sn-client-pub"
       )
     end
 
@@ -120,7 +120,7 @@ describe EventMachine::MQTTSN::Packet::Connect do
     end
 
     it "should set the Client Identifier of the packet correctly" do
-      expect(@packet.client_id).to eq('mqtts-client-pub')
+      expect(@packet.client_id).to eq('mqtt-sn-client-pub')
     end
   end
 
