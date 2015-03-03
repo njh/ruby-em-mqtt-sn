@@ -194,106 +194,106 @@ module EventMachine::MQTTSN
     end
 
     class Register < Packet
+      attr_accessor :id
       attr_accessor :topic_id
-      attr_accessor :message_id
       attr_accessor :topic_name
 
       DEFAULTS = {
-        :message_id => 0x00,
+        :id => 0x00,
         :topic_id_type => :normal
       }
 
       def encode_body
-        [encode_topic_id, message_id, topic_name].pack('nna*')
+        [encode_topic_id, id, topic_name].pack('nna*')
       end
 
       def parse_body(buffer)
-        topic_id, self.message_id, self.topic_name = buffer.unpack('nna*')
+        topic_id, self.id, self.topic_name = buffer.unpack('nna*')
         parse_topic_id(topic_id)
       end
     end
 
     class Regack < Packet
+      attr_accessor :id
       attr_accessor :topic_id
-      attr_accessor :message_id
       attr_accessor :return_code
 
       DEFAULTS = {
-        :message_id => 0x00,
+        :id => 0x00,
         :topic_id_type => :normal
       }
 
       def encode_body
-        [encode_topic_id, message_id, return_code].pack('nnC')
+        [encode_topic_id, id, return_code].pack('nnC')
       end
 
       def parse_body(buffer)
-        topic_id, self.message_id, self.return_code = buffer.unpack('nnC')
+        topic_id, self.id, self.return_code = buffer.unpack('nnC')
         parse_topic_id(topic_id)
       end
     end
 
     class Publish < Packet
       attr_accessor :topic_id
-      attr_accessor :message_id
+      attr_accessor :id
       attr_accessor :data
 
       DEFAULTS = {
+        :id => 0x00,
         :duplicate => false,
         :qos => 0,
         :retain => false,
-        :message_id => 0x00,
         :topic_id_type => :normal
       }
 
       def encode_body
-        [encode_flags, encode_topic_id, message_id, data].pack('Cnna*')
+        [encode_flags, encode_topic_id, id, data].pack('Cnna*')
       end
 
       def parse_body(buffer)
-        flags, topic_id, self.message_id, self.data = buffer.unpack('Cnna*')
+        flags, topic_id, self.id, self.data = buffer.unpack('Cnna*')
         parse_flags(flags)
         parse_topic_id(topic_id)
       end
     end
 
     class Subscribe < Packet
+      attr_accessor :id
       attr_accessor :topic_id
-      attr_accessor :message_id
       attr_accessor :topic_name
 
       DEFAULTS = {
-        :message_id => 0x00,
+        :id => 0x00,
         :topic_id_type => :normal
       }
 
       def encode_body
-        [encode_flags, message_id, topic_name].pack('Cna*')
+        [encode_flags, id, topic_name].pack('Cna*')
       end
 
       def parse_body(buffer)
-        flags, self.message_id, self.topic_name = buffer.unpack('Cna*')
+        flags, self.id, self.topic_name = buffer.unpack('Cna*')
         parse_flags(flags)
       end
     end
 
     class Suback < Packet
+      attr_accessor :id
       attr_accessor :topic_id
-      attr_accessor :message_id
       attr_accessor :return_code
 
       DEFAULTS = {
         :qos => 0,
-        :message_id => 0x00,
+        :id => 0x00,
         :topic_id_type => :normal
       }
 
       def encode_body
-        [encode_flags, encode_topic_id, message_id, return_code].pack('CnnC')
+        [encode_flags, encode_topic_id, id, return_code].pack('CnnC')
       end
 
       def parse_body(buffer)
-        flags, topic_id, self.message_id, self.return_code = buffer.unpack('CnnC')
+        flags, topic_id, self.id, self.return_code = buffer.unpack('CnnC')
         parse_flags(flags)
         parse_topic_id(topic_id)
       end

@@ -104,7 +104,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
         end
       when MQTT::Packet::Suback
         # Check that it is a response to a request we made
-        request = connection.remove_from_pending(packet.message_id)
+        request = connection.remove_from_pending(packet.id)
         if request
           logger.debug("#{connection.client_id} now subscribed to '#{request.topic_name}'")
           topic_id_type, topic_id = connection.get_topic_id(request.topic_name)
@@ -112,7 +112,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
             :topic_id_type => topic_id_type,
             :topic_id => topic_id,
             :qos => packet.granted_qos.first,
-            :message_id => packet.message_id,
+            :id => packet.id,
             :return_code => 0x00
           )
         else
@@ -128,7 +128,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
           :retain => packet.retain,
           :topic_id_type => topic_id_type,
           :topic_id => topic_id,
-          :message_id => packet.message_id,
+          :id => packet.id,
           :data => packet.payload
         )
       when MQTT::Packet::Pingreq
@@ -148,7 +148,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
   def register(connection, packet)
     regack = EventMachine::MQTTSN::Packet::Regack.new(
       :topic_id_type => :normal,
-      :message_id => packet.message_id
+      :id => packet.id
     )
 
     topic_id_type, topic_id = connection.get_topic_id(packet.topic_name)
@@ -187,7 +187,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
   def subscribe(connection, packet)
     logger.info("#{connection.client_id} subscribing to '#{packet.topic_name}'")
     mqtt_packet = MQTT::Packet::Subscribe.new(
-      :message_id => packet.message_id,
+      :id => packet.id,
       :topics => packet.topic_name
     )
     connection.add_to_pending(packet)

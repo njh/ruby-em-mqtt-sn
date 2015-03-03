@@ -298,8 +298,8 @@ describe EventMachine::MQTTSN::Packet::Register do
   describe "when serialising a packet" do
     it "should output the correct bytes for a register packet" do
       packet = EventMachine::MQTTSN::Packet::Register.new(
+        :id => 0x01,
         :topic_id => 0x01,
-        :message_id => 0x01,
         :topic_name => 'test'
       )
       expect(packet.to_s).to eq("\x0A\x0A\x00\x01\x00\x01test")
@@ -324,7 +324,7 @@ describe EventMachine::MQTTSN::Packet::Register do
     end
 
     it "should set the message id of the packet correctly" do
-      expect(@packet.message_id).to eq(0x01)
+      expect(@packet.id).to eq(0x01)
     end
 
     it "should set the topic name of the packet correctly" do
@@ -343,8 +343,8 @@ describe EventMachine::MQTTSN::Packet::Regack do
   describe "when serialising a packet" do
     it "should output the correct bytes for a register packet" do
       packet = EventMachine::MQTTSN::Packet::Regack.new(
+        :id => 0x02,
         :topic_id => 0x01,
-        :message_id => 0x02,
         :return_code => 0x03
       )
       expect(packet.to_s).to eq("\x07\x0B\x00\x01\x00\x02\x03")
@@ -369,7 +369,7 @@ describe EventMachine::MQTTSN::Packet::Regack do
     end
 
     it "should set the message id of the packet correctly" do
-      expect(@packet.message_id).to eq(0x02)
+      expect(@packet.id).to eq(0x02)
     end
 
     it "should set the topic name of the packet correctly" do
@@ -439,7 +439,7 @@ describe EventMachine::MQTTSN::Packet::Publish do
     end
 
     it "should set the message id of the packet correctly" do
-      expect(@packet.message_id).to be === 0x0000
+      expect(@packet.id).to be === 0x0000
     end
 
     it "should set the topic name of the packet correctly" do
@@ -479,7 +479,7 @@ describe EventMachine::MQTTSN::Packet::Publish do
     end
 
     it "should set the message id of the packet correctly" do
-      expect(@packet.message_id).to be === 0x0000
+      expect(@packet.id).to be === 0x0000
     end
 
     it "should set the topic name of the packet correctly" do
@@ -500,7 +500,7 @@ describe EventMachine::MQTTSN::Packet::Subscribe do
       packet = EventMachine::MQTTSN::Packet::Subscribe.new(
         :duplicate => false,
         :qos => 0,
-        :message_id => 0x02,
+        :id => 0x02,
         :topic_name => 'test'
       )
       expect(packet.to_s).to eq("\x09\x12\x00\x00\x02test")
@@ -517,7 +517,7 @@ describe EventMachine::MQTTSN::Packet::Subscribe do
     end
 
     it "should set the message id of the packet correctly" do
-      expect(@packet.message_id).to eq(0x03)
+      expect(@packet.id).to eq(0x03)
     end
 
     it "should set the message id of the packet correctly" do
@@ -544,9 +544,9 @@ describe EventMachine::MQTTSN::Packet::Suback do
   describe "when serialising a packet" do
     it "should output the correct bytes for a register packet" do
       packet = EventMachine::MQTTSN::Packet::Suback.new(
+        :id => 0x02,
         :qos => 0,
         :topic_id => 0x01,
-        :message_id => 0x02,
         :return_code => 0x03
       )
       expect(packet.to_s).to eq("\x08\x13\x00\x00\x01\x00\x02\x03")
@@ -575,7 +575,7 @@ describe EventMachine::MQTTSN::Packet::Suback do
     end
 
     it "should set the message id of the packet correctly" do
-      expect(@packet.message_id).to eq(0x02)
+      expect(@packet.id).to eq(0x02)
     end
 
     it "should set the topic name of the packet correctly" do

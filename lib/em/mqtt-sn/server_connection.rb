@@ -53,17 +53,17 @@ class EventMachine::MQTTSN::ServerConnection < EventMachine::MQTT::Connection
 
   # Add a packet to a list of messages that we are expecting a reply to
   def add_to_pending(packet)
-    @pending_requests[packet.message_id] = {
+    @pending_requests[packet.id] = {
       :packet => packet,
       :time => Time.now
     }
   end
 
   # Remove a packet that we have now received a reply to
-  def remove_from_pending(message_id)
-    if @pending_requests.has_key?(message_id)
-      request = @pending_requests[message_id]
-      @pending_requests.delete(message_id)
+  def remove_from_pending(id)
+    if @pending_requests.has_key?(id)
+      request = @pending_requests[id]
+      @pending_requests.delete(id)
       return request[:packet]
     end
   end
