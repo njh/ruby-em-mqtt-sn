@@ -20,6 +20,5 @@ module EventMachine::MQTTSN
   autoload :ServerConnection,  'em/mqtt-sn/server_connection'
   autoload :Gateway,           'em/mqtt-sn/gateway'
   autoload :GatewayHandler,    'em/mqtt-sn/gateway_handler'
-  autoload :Packet,            'em/mqtt-sn/packet'
 
 end

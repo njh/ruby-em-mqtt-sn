@@ -21,7 +21,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
 
   # UDP packet received by gateway
   def receive_data(data)
-    packet = EventMachine::MQTTSN::Packet.parse(data)
+    packet = MQTT::SN::Packet.parse(data)
     unless packet.nil?
       process_packet(get_peername, packet)
     end
@@ -31,23 +31,23 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
   def process_packet(peername, packet)
     logger.debug("Received MQTT-SN: #{packet.class}")
 
-    if packet.class == EventMachine::MQTTSN::Packet::Connect
+    if packet.class == MQTT::SN::Packet::Connect
       connect(peername, packet)
     else
       connection = @connections[peername]
       unless connection.nil? or !connection.connected?
         case packet
-          when EventMachine::MQTTSN::Packet::Register
+          when MQTT::SN::Packet::Register
             register(connection, packet)
-          when EventMachine::MQTTSN::Packet::Publish
+          when MQTT::SN::Packet::Publish
             publish(connection, packet)
-          when EventMachine::MQTTSN::Packet::Subscribe
+          when MQTT::SN::Packet::Subscribe
             subscribe(connection, packet)
-          when EventMachine::MQTTSN::Packet::Pingreq
+          when MQTT::SN::Packet::Pingreq
             connection.send_packet MQTT::Packet::Pingreq.new
-          when EventMachine::MQTTSN::Packet::Pingresp
+          when MQTT::SN::Packet::Pingresp
             connection.send_packet MQTT::Packet::Pingresp.new
-          when EventMachine::MQTTSN::Packet::Disconnect
+          when MQTT::SN::Packet::Disconnect
             disconnect(connection)
           else
             logger.warn("Unable to handle MQTT-SN packet of type: #{packet.class}")
@@ -94,7 +94,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
     case packet
       when MQTT::Packet::Connack
         # FIXME: re-map the return code
-        mqttsn_packet = EventMachine::MQTTSN::Packet::Connack.new(
+        mqttsn_packet = MQTT::SN::Packet::Connack.new(
           :return_code => packet.return_code
         )
         if packet.return_code == 0
@@ -108,7 +108,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
         if request
           logger.debug("#{connection.client_id} now subscribed to '#{request.topic_name}'")
           topic_id_type, topic_id = connection.get_topic_id(request.topic_name)
-          mqttsn_packet = EventMachine::MQTTSN::Packet::Suback.new(
+          mqttsn_packet = MQTT::SN::Packet::Suback.new(
             :topic_id_type => topic_id_type,
             :topic_id => topic_id,
             :qos => packet.granted_qos.first,
@@ -122,7 +122,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
         logger.info("#{connection.client_id} recieved publish to '#{packet.topic}'")
         # FIXME: send register if this is a new topic
         topic_id_type, topic_id = connection.get_topic_id(packet.topic)
-        mqttsn_packet = EventMachine::MQTTSN::Packet::Publish.new(
+        mqttsn_packet = MQTT::SN::Packet::Publish.new(
           :duplicate => packet.duplicate,
           :qos => packet.qos,
           :retain => packet.retain,
@@ -132,9 +132,9 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
           :data => packet.payload
         )
       when MQTT::Packet::Pingreq
-        mqttsn_packet = EventMachine::MQTTSN::Packet::Pingreq.new
+        mqttsn_packet = MQTT::SN::Packet::Pingreq.new
       when MQTT::Packet::Pingresp
-        mqttsn_packet = EventMachine::MQTTSN::Packet::Pingresp.new
+        mqttsn_packet = MQTT::SN::Packet::Pingresp.new
       else
         logger.warn("Unable to handle MQTT packet of type: #{packet.class}")
     end
@@ -146,7 +146,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
 
   # REGISTER received from client
   def register(connection, packet)
-    regack = EventMachine::MQTTSN::Packet::Regack.new(
+    regack = MQTT::SN::Packet::Regack.new(
       :topic_id_type => :normal,
       :id => packet.id
     )
@@ -198,7 +198,7 @@ class EventMachine::MQTTSN::GatewayHandler < EventMachine::Connection
   def disconnect(connection)
     if connection.connected?
       logger.info("Disconnected: #{connection.client_id}")
-      mqttsn_packet = EventMachine::MQTTSN::Packet::Disconnect.new
+      mqttsn_packet = MQTT::SN::Packet::Disconnect.new
       send_datagram(mqttsn_packet.to_s, connection.client_address, connection.client_port)
       connection.disconnect
     end

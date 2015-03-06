@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = %w(lib)
 
   gem.add_runtime_dependency     'eventmachine'
-  gem.add_runtime_dependency     'mqtt',        '>= 0.3.0'
+  gem.add_runtime_dependency     'mqtt',        '>= 0.4.0'
   gem.add_runtime_dependency     'em-mqtt',     '>= 0.0.3'
 
   if Gem.ruby_version > Gem::Version.new('1.9')
